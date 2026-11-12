@@ -34,6 +34,12 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(dirname),
   },
+  experimental: {
+    // Page and data cache live only in the in-memory LRU (cacheMaxMemorySize, 50 MB), never on
+    // disk: Next caches the 404 of every unknown /kurse/<slug>/, so random URLs would otherwise
+    // fill the disk. The cache starts empty after a restart (docs/PLAN.md, Phase 2 status).
+    isrFlushToDisk: false,
+  },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

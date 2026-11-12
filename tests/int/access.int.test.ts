@@ -208,6 +208,115 @@ describe('locked fields and guards', () => {
     expect(course.slug).toBe('yoga-fuer-ruecken')
   })
 
+  it('publishes a course whose first autosave had no title yet (the admin flow)', async () => {
+    const asAdmin = { overrideAccess: false, user: admin, context: { disableRevalidate: true } }
+    // Opening "new course" autosaves an empty draft; every later save is an update.
+    const draft = await payload.create({
+      collection: 'courses',
+      data: {},
+      draft: true,
+      ...asAdmin,
+    })
+    expect(draft.slug ?? null).toBeNull()
+
+    const typed = await payload.update({
+      collection: 'courses',
+      id: draft.id,
+      data: { title: 'Yin Yo' },
+      draft: true,
+      autosave: true,
+      ...asAdmin,
+    })
+    expect(typed.slug).toBe('yin-yo')
+
+    const { slug: _ignored, ...rest } = courseData('ignored', heroImage)
+    const published = await payload.update({
+      collection: 'courses',
+      id: draft.id,
+      data: { ...rest, title: 'Yin Yoga für Anfänger', _status: 'published' },
+      ...asAdmin,
+    })
+    expect(published.slug).toBe('yin-yoga-fuer-anfaenger')
+  })
+
+  it('a second untitled draft does not clash with the first', async () => {
+    const asAdmin = { overrideAccess: false, user: admin, context: { disableRevalidate: true } }
+    const first = await payload.create({ collection: 'courses', data: {}, draft: true, ...asAdmin })
+    const second = await payload.create({
+      collection: 'courses',
+      data: {},
+      draft: true,
+      ...asAdmin,
+    })
+    expect(second.id).not.toBe(first.id)
+  })
+
+  it('keeps the slug once a course was published, also after unpublishing', async () => {
+    const asAdmin = { overrideAccess: false, user: admin, context: { disableRevalidate: true } }
+    const live = await payload.create({
+      collection: 'courses',
+      data: { ...courseData('slug-once-live', heroImage), _status: 'published' },
+      ...asAdmin,
+    })
+    const unpublished = await payload.update({
+      collection: 'courses',
+      id: live.id,
+      data: { _status: 'draft' },
+      ...asAdmin,
+    })
+    const renamed = await payload.update({
+      collection: 'courses',
+      id: unpublished.id,
+      data: { title: 'Ganz anderer Titel' },
+      draft: true,
+      ...asAdmin,
+    })
+    expect(renamed.slug).toBe('slug-once-live')
+  })
+
+  it('duplicating a published course gives the copy its own slug from the new title', async () => {
+    const asAdmin = { overrideAccess: false, user: admin, context: { disableRevalidate: true } }
+    const original = await payload.create({
+      collection: 'courses',
+      data: { ...courseData('slug-original', heroImage), _status: 'published' },
+      ...asAdmin,
+    })
+    const copy = await payload.duplicate({
+      collection: 'courses',
+      id: original.id,
+      draft: true,
+      ...asAdmin,
+    })
+    expect(copy.id).not.toBe(original.id)
+    expect(copy.slug).not.toBe('slug-original')
+
+    const renamed = await payload.update({
+      collection: 'courses',
+      id: copy.id,
+      data: { title: 'Abendkurs am Mittwoch' },
+      draft: true,
+      ...asAdmin,
+    })
+    expect(renamed.slug).toBe('abendkurs-am-mittwoch')
+  })
+
+  it('lets a maintenance script rename a published slug on purpose', async () => {
+    const live = await payload.create({
+      collection: 'courses',
+      data: { ...courseData('slug-before-move', heroImage), _status: 'published' },
+      overrideAccess: true,
+      context: { disableRevalidate: true },
+    })
+    const moved = await payload.update({
+      collection: 'courses',
+      id: live.id,
+      data: { slug: 'Slug nach Umzug' },
+      overrideAccess: true,
+      context: { disableRevalidate: true, allowSlugChange: true },
+    })
+    expect(moved.slug).toBe('slug-nach-umzug')
+  })
+
   it('never deletes the last admin user', async () => {
     await expect(
       payload.delete({ collection: 'users', id: admin.id, overrideAccess: false, user: admin }),

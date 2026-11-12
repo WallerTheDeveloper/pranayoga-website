@@ -245,7 +245,7 @@ export interface Course {
     image?: (number | null) | Media;
   };
   /**
-   * Generated from the title on create, then locked (part of the URL).
+   * Made from the title on save. Fixed after the first publish (part of the URL).
    */
   slug: string;
   /**

@@ -6,7 +6,7 @@ import { isValidTime, compareTimes } from '@/lib/validation/time'
 import { isValidWhatsAppUrl, WHATSAPP_URL_PREFIXES } from '@/lib/validation/whatsapp'
 import { isAllowedSocialUrl } from '@/lib/validation/social'
 import { meetsImageTier, IMAGE_TIER_MIN_SHORT_SIDE } from '@/lib/validation/imageTier'
-import { slugify } from '@/lib/validation/slug'
+import { canResolveSlug, slugify } from '@/lib/validation/slug'
 
 describe('IBAN', () => {
   it('accepts a valid German IBAN with or without spaces', () => {
@@ -129,5 +129,14 @@ describe('slugify', () => {
   it('collapses separators and trims', () => {
     expect(slugify('  Yoga   Sport // Balance  ')).toBe('yoga-sport-balance')
     expect(slugify('---')).toBe('')
+  })
+
+  it('accepts an empty slug while the title can still produce one', () => {
+    expect(canResolveSlug('hatha-yoga', '')).toBe(true)
+    expect(canResolveSlug('', 'Yin Yoga')).toBe(true)
+    expect(canResolveSlug(null, 'Yin Yoga')).toBe(true)
+    expect(canResolveSlug(undefined, undefined)).toBe(false)
+    expect(canResolveSlug('', '')).toBe(false)
+    expect(canResolveSlug('  ', '!!!')).toBe(false)
   })
 })

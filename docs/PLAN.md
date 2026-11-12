@@ -103,7 +103,9 @@ Each function returns a typed object.
 Every admin user can do everything. Anonymous visitors can only read published content.
 - **Helpers** in `src/access/`: `isLoggedIn`, `publishedOrLoggedIn` (anonymous reads get published docs only) and `nobody`. Every collection and global uses them instead of inline access logic.
 - **Admin nav groups** (labels de/en): Inhalte/Content · Preise/Prices · Einstellungen/Settings · Technik/Technical. Technik holds `users`, `technical-settings` and `redirects`, with a description saying these are technical.
-- **Course URL slugs:** set from the title on create, then locked in the admin (`access.update: nobody`). Changing one goes through us: a script plus a 301 in Redirects.
+- **Course URL slugs:** made from the title on every save until the course is first published, then locked, also after unpublishing (`src/fields/slug.ts`). The admin shows the slug read-only.
+  - The admin autosaves a new course before its title is typed, so "set on create" alone left the slug empty and blocked publishing (fixed on 2026-11-12).
+  - Changing a published slug goes through us: a script with `context: { allowSlugChange: true }` plus a 301 in Redirects.
 - **Secrets** stay in env, never in the DB.
 
 **Guardrails** (validation hooks):
@@ -254,29 +256,29 @@ This is a guardrail against mistakes, not a security sandbox.
 - **Routes:** `/kurse/` is static (re-rendered daily like every page). `/kurse/[slug]/` has `generateStaticParams` returning `[]`, so each course renders on its first visit and then stays cached until a publish. Unknown slugs get a 404.
 - **`teacher-training` global:**
   - Fields: `startMonth` (month picker), `price`, and `teaser` {`heading`, `text`, `facts` (up to 3 value/label rows), `priceNote`}.
-  - Drafts with autosave; the `teacher-training` tag. The teaser shows the price as its last fact and uses "Gesamtpreis" when the note is empty.
+  - Drafts with autosave; the `teacher-training` tag. The teaser shows the price as its last fact and uses "Gesamtpreis" when the note is empty (confirmed on 2026-11-12).
   - Seeded from the design copy. Start month and price stay empty ("[Monat Jahr]" and "[Preis]" in the design).
   - Preview opens `/kurse/` until the page exists in phase 3.
 - **Price on a course page:** a price block has an optional `course` relationship. The first linked block that has a price shows in that course's hero ("Yoga für Jugendliche: 45 € · Alle Preise"). The seed links the Jugend-Yoga block, but its price is still empty, so nothing shows yet.
-- **"Weitere Kurse":** automatic, with no admin field. It shows the three courses nearest in admin order (the earlier one wins a tie), listed in admin order. This matches the design on 5 of 6 pages. Jugendliche shows Rücken, Klangschalen and Rad Yoga instead of the design's Hatha, Rücken and Klangschalen.
+- **"Weitere Kurse":** automatic, with no admin field. It shows the three courses nearest in admin order (the earlier one wins a tie), listed in admin order. This matches the design on 5 of 6 pages. Jugendliche shows Rücken, Klangschalen and Rad Yoga instead of the design's Hatha, Rücken and Klangschalen. Confirmed on 2026-11-12.
 - **Template variants:**
   - Hero frame by photo orientation: 3:2, or 2:3 for portrait photos.
   - Audience with or without a photo.
   - Steps with or without photos.
   - Benefits as photo cards plus a ticked list, with an optional side photo.
-  - The schedule sits inside the trial panel. With no trial offer it gets its own panel (not in the design), and it is hidden while empty.
+  - The schedule sits inside the trial panel. With no trial offer it gets its own panel (not in the design), and it is hidden while empty. Confirmed on 2026-11-12.
 - **From the Phase 1 review, done:** `getCourse` checks the slug against `getCourses()` before it touches the per-slug cache entry.
-- **Open, decide at this gate — 404s in the route cache:**
-  - Next stores the 404 render of every unknown `/kurse/<slug>/` in `.next/server/route-cache` (about 100 KB per slug).
-  - It is tagged `courses`, so publishing a course with that slug later clears it. That part is correct, but random URLs grow the disk.
-  - Options:
-    - (A) `experimental.isrFlushToDisk: false`: route and data cache stay in the 50 MB in-memory LRU and are lost on restart. The planned post-deploy warm-up refills them.
-    - (B) A `proxy.ts` that answers unlisted course slugs with 404 before the route cache. It needs a slug lookup that works without `draftMode()`.
-    - (C) Leave it to Caddy rate limiting in the hosting phase.
-  - Recommendation: A.
+- **404s in the route cache — decided A (2026-11-12); restart follow-up decided (a), built in the hosting phase:**
+  - Next caches the 404 render of every unknown `/kurse/<slug>/`. With default settings it is written to `.next/server/route-cache` (about 100 KB per slug), so random URLs grow the disk. The entry is tagged `courses`, so a later publish of that slug clears it.
+  - `next.config.ts` now sets `experimental.isrFlushToDisk: false`. Route and data cache live only in the 50 MB in-memory LRU. Verified: a repeat unknown slug is a memory `HIT` and nothing is written to disk. The 64 E2E tests still pass, including publish-then-reload.
+  - Side effects:
+    - `scripts/clear-data-cache.mjs` becomes a harmless no-op, because data-cache files on disk are no longer read.
+    - Verified side effect: after a server restart, pages prerendered at build (`/`, `/kurse/`) serve their build-time HTML as a cache hit until the daily re-render. Edits published after the last deploy disappear from those pages until then. Next keeps its cleared-tags list only in memory, and with A the newer render was never on disk. Course pages are not affected; they render fresh after a restart.
+  - Follow-up, decided (a) on 2026-11-12: a secured route handler that marks every cached page stale, called by the container start script before the warm-up. It is built in the hosting phase (see "Hosting").
+- **Fixed after the gate (2026-11-12): new courses could not be published.** The slug was only generated on create, but the admin's first autosave creates an untitled draft. Now the slug follows the title until the first publish; see "Course URL slugs". Duplicating a course gives the copy `<slug>-copy`, and the slug then follows the new title. Covered by integration tests (autosave flow, untitled drafts, lock after unpublish, duplicate, script rename) and two admin-UI E2E tests (new course; duplicate, rename, publish, then the URL answers 200).
 - **Tests:**
-  - 312 unit and integration tests (coverage 97% statements, 92% branches).
-  - 64 E2E tests. They cover every course rendering with breadcrumbs, canonical and related courses; FAQ toggling by mouse and keyboard; the schedule hidden when empty and shown after a publish; 404 on repeat visits; and a course-page cache hit. axe runs on the overview and all six courses, plus screenshots at 1440 and 390.
+  - 318 unit and integration tests (after the slug fix; 312 at the gate) (coverage 97% statements, 92% branches).
+  - 66 E2E tests (64 at the gate, plus 2 admin-UI tests). They cover every course rendering with breadcrumbs, canonical and related courses; FAQ toggling by mouse and keyboard; the schedule hidden when empty and shown after a publish; 404 on repeat visits; and a course-page cache hit. axe runs on the overview and all six courses, plus screenshots at 1440 and 390.
 - **Review:** one code-reviewer pass found 0 CRITICAL and 0 HIGH issues.
   - Fixed: M1 (assert the course-page cache tags, plus a comment), M2 (course grids are now `ul`/`li`), M3 (duplicate "Kurszeiten" label in the no-trial panel).
   - M4 is confirmed; see the open item above.
@@ -323,7 +325,7 @@ This is a guardrail against mistakes, not a security sandbox.
 - `node --test ".claude/hooks/**/*.test.mjs"` passes; a blocked command such as `git commit` is refused by the hook.
 
 ## Hosting (decided; a later phase)
-Stay on OVH. The client keeps her Web Hosting plan for the domain and email, and buys a VPS-1 (2 vCores, 4 GB, 40 GB NVMe) when we reach the hosting phase. That server runs Docker Compose (app + Postgres + Caddy), with images built in CI. Uploads are bind-mounted from the server's disk, and Postgres uses a volume on the same disk (see "Media & file storage"). Nightly backups (`pg_dump` plus `uploads/`) go to the client's existing OVH Web Hosting space, so no new service is needed. After each deploy, a warm-up script requests every sitemap URL to fill the cache. Not part of this plan's phases. Keep the code host-agnostic: env-based config and a Dockerfile added in the hosting phase.
+Stay on OVH. The client keeps her Web Hosting plan for the domain and email, and buys a VPS-1 (2 vCores, 4 GB, 40 GB NVMe) when we reach the hosting phase. That server runs Docker Compose (app + Postgres + Caddy), with images built in CI. Uploads are bind-mounted from the server's disk, and Postgres uses a volume on the same disk (see "Media & file storage"). Nightly backups (`pg_dump` plus `uploads/`) go to the client's existing OVH Web Hosting space, so no new service is needed. After each deploy, a warm-up script requests every sitemap URL to fill the cache. Because the page cache lives only in memory (`isrFlushToDisk: false`, Phase 2), every container start first calls a secured "revalidate everything" route handler (a secret from env, constant-time compare, POST only, rate-limited). Then the warm-up runs. Without that step, pages prerendered at build would serve build-time HTML after an unplanned restart. Not part of this plan's phases. Keep the code host-agnostic: env-based config and a Dockerfile added in the hosting phase.
 
 From the Phase 1 review, before launch:
 - Add a Payload email adapter. Without one, "forgot password" has nowhere to send the link.
