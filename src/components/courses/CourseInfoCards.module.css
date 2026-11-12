@@ -1,0 +1,13 @@
+/* Design `.two`: two equal columns, one below 760 px. */
+.two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+@container page (max-width: 760px) {
+  .two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

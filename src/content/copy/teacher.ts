@@ -21,4 +21,9 @@ export const teacherCopy = {
     { image: 'sealYacep', title: 'YACEP', issuer: 'Yoga Alliance' },
   ] as const satisfies readonly Seal[],
   moreLink: 'Mehr über Liudmyla',
+  /** The small card on the course pages, next to "Was Sie mitbringen". */
+  compact: {
+    portrait: 'teacherSmall' as CopyMediaKey,
+    credentials: 'E-RYT 200 · E-RYT 500 · YACEP · über 20 Jahre Praxis',
+  },
 } as const

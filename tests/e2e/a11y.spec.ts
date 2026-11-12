@@ -1,7 +1,9 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 
-/** axe-core on the home page: no serious or critical WCAG 2.2 AA violations. */
+import { seedCourses } from '../../seed/data/courses'
+
+/** axe-core on every built page: no serious or critical WCAG 2.2 AA violations. */
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
@@ -46,5 +48,28 @@ test('open mobile menu @mobile', async ({ page }) => {
   const dialog = page.getByRole('dialog', { name: 'Menü', exact: true })
   await expect(dialog).toBeVisible()
   await expect(dialog).toHaveCSS('opacity', '1')
+  expect(await seriousViolations(page)).toEqual([])
+})
+
+test('course overview, desktop', async ({ page }) => {
+  await page.goto('/kurse/')
+  expect(await seriousViolations(page)).toEqual([])
+})
+
+test('course overview, phone @mobile', async ({ page }) => {
+  await page.goto('/kurse/')
+  expect(await seriousViolations(page)).toEqual([])
+})
+
+// Each course uses other template variants (photos, quote, side image), so check them all.
+for (const course of seedCourses) {
+  test(`${course.title}, desktop`, async ({ page }) => {
+    await page.goto(`/kurse/${course.slug}/`)
+    expect(await seriousViolations(page)).toEqual([])
+  })
+}
+
+test('course page, phone @mobile', async ({ page }) => {
+  await page.goto('/kurse/hatha-yoga/')
   expect(await seriousViolations(page)).toEqual([])
 })

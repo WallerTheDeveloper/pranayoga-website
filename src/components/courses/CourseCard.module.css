@@ -32,8 +32,49 @@
   color: var(--color-moss);
 }
 
+/* Photo cards: the photo bleeds to the card's top and side edges. */
+.photo {
+  margin: -28px -28px 4px;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+
+.facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  font-size: var(--text-meta);
+}
+
+.term {
+  color: var(--color-ink-muted);
+}
+
+.value {
+  margin: 0;
+  font-weight: 600;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
   gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The card fills its list item, so cards in a row share one height. */
+.item {
+  display: flex;
+  min-width: 0;
+}
+
+.item > * {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.photoGrid {
+  grid-template-columns: repeat(auto-fill, minmax(min(460px, 100%), 1fr));
 }

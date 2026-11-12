@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import styles from './Heading.module.css'
 
 export type HeadingLevel = 'h1' | 'h2' | 'h3'
-export type HeadingSize = 'display' | 'section' | 'card' | 'cardWide'
+export type HeadingSize = 'display' | 'page' | 'section' | 'card' | 'cardWide'
 
 interface HeadingProps {
   as: HeadingLevel

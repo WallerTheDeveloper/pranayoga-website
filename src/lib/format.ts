@@ -20,6 +20,25 @@ export function formatPrice(amount: number | null | undefined): string | null {
   return Number.isInteger(amount) ? wholeEuro.format(amount) : euroWithCents.format(amount)
 }
 
+/** The studio's time zone: admin dates are read as they look on its calendar. */
+const STUDIO_TIME_ZONE = 'Europe/Berlin'
+
+const monthYear = new Intl.DateTimeFormat('de-DE', {
+  month: 'long',
+  year: 'numeric',
+  timeZone: STUDIO_TIME_ZONE,
+})
+
+/**
+ * "März 2027" from an admin date. The month picker stores local midnight on the 1st, which is
+ * the evening before in UTC, so the month is read in the studio's time zone. Null when unset.
+ */
+export function formatMonthYear(value: string | null | undefined): string | null {
+  if (!value) return null
+  const time = Date.parse(value)
+  return Number.isFinite(time) ? monthYear.format(time) : null
+}
+
 export const WEEKDAYS = [
   'monday',
   'tuesday',

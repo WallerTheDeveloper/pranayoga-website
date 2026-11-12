@@ -111,6 +111,26 @@ export function PlusIcon(props: IconProps) {
 /** Alias kept for the lightbox trigger (phase 3). */
 export const ZoomIcon = PlusIcon
 
+/** Circled "i": the medical note on the course pages. */
+export function InfoIcon(props: IconProps) {
+  return (
+    <IconBase grid={24} defaultStroke={1.75} {...props}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 11v5M12 8v.01" />
+    </IconBase>
+  )
+}
+
+/** Clock: "Kurszeiten und freie Plätze" on the course overview. */
+export function ClockIcon(props: IconProps) {
+  return (
+    <IconBase grid={24} defaultStroke={1.75} {...props}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </IconBase>
+  )
+}
+
 export function CheckIcon(props: IconProps) {
   return (
     <IconBase grid={24} defaultStroke={2.2} {...props}>

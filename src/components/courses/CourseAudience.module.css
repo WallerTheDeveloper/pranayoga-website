@@ -1,0 +1,68 @@
+/* "Für wen" block (design `.split`, 5fr / 7fr). */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 72px;
+  align-items: start;
+}
+
+.center {
+  align-items: center;
+}
+
+.photo {
+  width: 100%;
+  max-width: 440px;
+  justify-self: center;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.first,
+.paragraph,
+.quote p {
+  margin: 0;
+  max-width: 640px;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+
+.first {
+  color: var(--color-ink);
+}
+
+.paragraph,
+.quote {
+  color: var(--color-ink-muted);
+}
+
+.quote {
+  margin: 0;
+}
+
+.note {
+  margin: 0;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: var(--text-meta);
+  color: var(--color-ink-muted);
+}
+
+.noteIcon {
+  flex: none;
+  margin-top: 3px;
+  color: var(--color-moss);
+}
+
+@container page (max-width: 960px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+}

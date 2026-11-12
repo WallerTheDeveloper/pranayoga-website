@@ -30,7 +30,15 @@ export type PreviewSource =
 /** The public page that shows a document, or null when it has no page of its own. */
 export function previewPathFor(source: PreviewSource): string | null {
   if (source.kind === 'global') {
-    return source.slug === 'business-settings' ? routes.home() : null
+    switch (source.slug) {
+      case 'business-settings':
+        return routes.home()
+      // The teaser's first home; switches to routes.teacherTraining() with that page (phase 3).
+      case 'teacher-training':
+        return routes.courses()
+      default:
+        return null
+    }
   }
   switch (source.slug) {
     case 'courses': {

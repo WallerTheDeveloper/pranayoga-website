@@ -249,6 +249,25 @@ describe('globals', () => {
     expect(expired()).toEqual(['business-settings'])
   })
 
+  it('teacher training: draft saves clear nothing, publishing clears', async () => {
+    const teaser = { heading: 'Werden Sie Yogalehrerin.' }
+    await payload.updateGlobal({
+      slug: 'teacher-training',
+      data: { teaser, _status: 'published' },
+      user: admin,
+    })
+    expect(expired()).toEqual(['teacher-training'])
+
+    vi.mocked(revalidateTag).mockClear()
+    await payload.updateGlobal({
+      slug: 'teacher-training',
+      data: { teaser: { heading: 'Entwurf' } },
+      draft: true,
+      user: admin,
+    })
+    expect(expired()).toEqual([])
+  })
+
   it('technical settings: publishing clears', async () => {
     await payload.updateGlobal({
       slug: 'technical-settings',

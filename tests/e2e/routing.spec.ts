@@ -27,20 +27,24 @@ for (const path of INTERNAL_ONLY) {
   })
 }
 
-test('every internal link on the home page uses a German URL', async ({ page }) => {
-  await page.goto('/')
-  const hrefs = await page
-    .locator('a[href^="/"]')
-    .evaluateAll((links) => links.map((link) => new URL((link as HTMLAnchorElement).href).pathname))
-  const pagePaths = [...new Set(hrefs)].filter((href) => !href.startsWith('/api/'))
-  expect(pagePaths.length).toBeGreaterThan(10)
-  for (const href of pagePaths) {
-    expect(
-      PUBLIC_PATTERNS.some((pattern) => pattern.test(href)),
-      href,
-    ).toBe(true)
-  }
-})
+for (const pagePath of ['/', '/kurse/', '/kurse/hatha-yoga/']) {
+  test(`every internal link on ${pagePath} uses a German URL`, async ({ page }) => {
+    await page.goto(pagePath)
+    const hrefs = await page
+      .locator('a[href^="/"]')
+      .evaluateAll((links) =>
+        links.map((link) => new URL((link as HTMLAnchorElement).href).pathname),
+      )
+    const pagePaths = [...new Set(hrefs)].filter((href) => !href.startsWith('/api/'))
+    expect(pagePaths.length).toBeGreaterThan(10)
+    for (const href of pagePaths) {
+      expect(
+        PUBLIC_PATTERNS.some((pattern) => pattern.test(href)),
+        href,
+      ).toBe(true)
+    }
+  })
+}
 
 test('pages that do not exist answer 404', async ({ request }) => {
   const response = await request.get('/gibt-es-nicht/')

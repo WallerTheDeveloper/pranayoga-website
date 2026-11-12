@@ -47,12 +47,34 @@ export const COPY_MEDIA = {
     tier: 'card',
     place: 'Startseite: Neu im Studio',
   },
+  coursesHero: {
+    filename: 'courses-forward-bend-straddle.jpg',
+    tier: 'feature',
+    place: 'Kurse: Titelbild',
+  },
+  coursesBringAlong: {
+    filename: 'courses-relaxed-cross-legged.jpg',
+    tier: 'card',
+    place: 'Kurse: Was benötige ich?',
+  },
+  teacherSmall: {
+    filename: 'liudmyla-studio-window.jpg',
+    tier: 'small',
+    place: 'Kursseiten: Ihre Lehrerin',
+  },
 } as const satisfies Record<string, CopyMediaRef>
 
 export type CopyMediaKey = keyof typeof COPY_MEDIA
 
 export const COPY_MEDIA_KEYS = Object.keys(COPY_MEDIA) as CopyMediaKey[]
 
+/** File name → every place that shows it; one file may serve several places. */
 export const COPY_MEDIA_PLACES: ReadonlyMap<string, string> = new Map(
-  Object.values(COPY_MEDIA).map((ref) => [ref.filename, ref.place]),
+  [...new Set(Object.values(COPY_MEDIA).map((ref) => ref.filename))].map((filename) => [
+    filename,
+    Object.values(COPY_MEDIA)
+      .filter((ref) => ref.filename === filename)
+      .map((ref) => ref.place)
+      .join('; '),
+  ]),
 )

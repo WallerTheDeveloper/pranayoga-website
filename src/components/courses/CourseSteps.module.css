@@ -1,0 +1,58 @@
+/* "In der Stunde": numbered linen cards. */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--color-linen);
+  box-shadow: inset 0 0 0 1px rgba(42, 33, 27, 0.1);
+}
+
+.photo {
+  margin: -28px -28px 6px;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+
+.number {
+  font-size: 40px;
+  line-height: 1;
+  font-style: italic;
+  color: var(--color-moss);
+}
+
+.title {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 450;
+}
+
+.text {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: var(--color-ink-muted);
+}

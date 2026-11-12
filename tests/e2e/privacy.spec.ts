@@ -13,18 +13,20 @@ function collectForeignRequests(page: Page, origin: string): string[] {
   return foreign
 }
 
-test('the home page only talks to its own origin and sets no cookies', async ({
-  page,
-  context,
-  baseURL,
-}) => {
-  const foreign = collectForeignRequests(page, new URL(baseURL ?? '').origin)
-  await page.goto('/')
-  await settle(page)
+for (const pagePath of ['/', '/kurse/', '/kurse/hatha-yoga/']) {
+  test(`${pagePath} only talks to its own origin and sets no cookies`, async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    const foreign = collectForeignRequests(page, new URL(baseURL ?? '').origin)
+    await page.goto(pagePath)
+    await settle(page)
 
-  expect(foreign).toEqual([])
-  expect(await context.cookies()).toEqual([])
-})
+    expect(foreign).toEqual([])
+    expect(await context.cookies()).toEqual([])
+  })
+}
 
 test('the phone layout only talks to its own origin @mobile', async ({
   page,

@@ -6,7 +6,8 @@ import { Heading } from '@/components/ui/Heading'
 import styles from './SectionIntro.module.css'
 
 interface SectionIntroProps {
-  eyebrow: string
+  /** Caps label above the heading; "Weitere Kurse" has none. */
+  eyebrow?: string
   heading: string
   accent?: string
   headingId?: string
@@ -26,7 +27,7 @@ export function SectionIntro({
   return (
     <div className={styles.root}>
       <div className={styles.titles}>
-        <Eyebrow>{eyebrow}</Eyebrow>
+        {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
         <Heading as="h2" size="section" accent={accent} id={headingId}>
           {heading}
         </Heading>

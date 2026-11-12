@@ -40,7 +40,7 @@ export async function runSeed(projectDir: string): Promise<void> {
     const mediaIds = await seedMedia(payload, manifest.images, imagesDir)
     const ctx = { payload, mediaIds }
     const courseIds = await seedCourseDocs(ctx)
-    await seedPriceGroupDocs(ctx)
+    await seedPriceGroupDocs(ctx, courseIds)
     await seedReviewDocs(ctx)
     await seedGlobals(ctx)
     await seedRedirectDocs(ctx, courseIds)

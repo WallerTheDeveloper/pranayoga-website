@@ -46,6 +46,8 @@
 
   /* Type scale · desktop / phone, fluid on the page container (cqi) */
   --text-display: clamp(44px, 6.2cqi, 88px);
+  /* h1 on sub-pages (Kurse, course pages) */
+  --text-page-title: clamp(42px, 5.6cqi, 80px);
   --text-h1: clamp(40px, 4.4cqi, 64px);
   --text-h2: clamp(34px, 3.4cqi, 48px);
   --text-h3: 28px;

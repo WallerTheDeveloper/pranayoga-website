@@ -248,7 +248,44 @@ This is a guardrail against mistakes, not a security sandbox.
     - Unit: `routes.ts` href builders and the generated rewrite/redirect tables.
 11. Review with the code-reviewer agent and fix CRITICAL/HIGH issues.
 
-## Phase 2: courses overview + course template ×6 → review
+## Phase 2: courses overview + course template ×6 → review ✅ built, awaiting review
+
+**Status:** built on 2026-11-12; waiting at the review gate.
+- **Routes:** `/kurse/` is static (re-rendered daily like every page). `/kurse/[slug]/` has `generateStaticParams` returning `[]`, so each course renders on its first visit and then stays cached until a publish. Unknown slugs get a 404.
+- **`teacher-training` global:**
+  - Fields: `startMonth` (month picker), `price`, and `teaser` {`heading`, `text`, `facts` (up to 3 value/label rows), `priceNote`}.
+  - Drafts with autosave; the `teacher-training` tag. The teaser shows the price as its last fact and uses "Gesamtpreis" when the note is empty.
+  - Seeded from the design copy. Start month and price stay empty ("[Monat Jahr]" and "[Preis]" in the design).
+  - Preview opens `/kurse/` until the page exists in phase 3.
+- **Price on a course page:** a price block has an optional `course` relationship. The first linked block that has a price shows in that course's hero ("Yoga für Jugendliche: 45 € · Alle Preise"). The seed links the Jugend-Yoga block, but its price is still empty, so nothing shows yet.
+- **"Weitere Kurse":** automatic, with no admin field. It shows the three courses nearest in admin order (the earlier one wins a tie), listed in admin order. This matches the design on 5 of 6 pages. Jugendliche shows Rücken, Klangschalen and Rad Yoga instead of the design's Hatha, Rücken and Klangschalen.
+- **Template variants:**
+  - Hero frame by photo orientation: 3:2, or 2:3 for portrait photos.
+  - Audience with or without a photo.
+  - Steps with or without photos.
+  - Benefits as photo cards plus a ticked list, with an optional side photo.
+  - The schedule sits inside the trial panel. With no trial offer it gets its own panel (not in the design), and it is hidden while empty.
+- **From the Phase 1 review, done:** `getCourse` checks the slug against `getCourses()` before it touches the per-slug cache entry.
+- **Open, decide at this gate — 404s in the route cache:**
+  - Next stores the 404 render of every unknown `/kurse/<slug>/` in `.next/server/route-cache` (about 100 KB per slug).
+  - It is tagged `courses`, so publishing a course with that slug later clears it. That part is correct, but random URLs grow the disk.
+  - Options:
+    - (A) `experimental.isrFlushToDisk: false`: route and data cache stay in the 50 MB in-memory LRU and are lost on restart. The planned post-deploy warm-up refills them.
+    - (B) A `proxy.ts` that answers unlisted course slugs with 404 before the route cache. It needs a slug lookup that works without `draftMode()`.
+    - (C) Leave it to Caddy rate limiting in the hosting phase.
+  - Recommendation: A.
+- **Tests:**
+  - 312 unit and integration tests (coverage 97% statements, 92% branches).
+  - 64 E2E tests. They cover every course rendering with breadcrumbs, canonical and related courses; FAQ toggling by mouse and keyboard; the schedule hidden when empty and shown after a publish; 404 on repeat visits; and a course-page cache hit. axe runs on the overview and all six courses, plus screenshots at 1440 and 390.
+- **Review:** one code-reviewer pass found 0 CRITICAL and 0 HIGH issues.
+  - Fixed: M1 (assert the course-page cache tags, plus a comment), M2 (course grids are now `ul`/`li`), M3 (duplicate "Kurszeiten" label in the no-trial panel).
+  - M4 is confirmed; see the open item above.
+  - L2 (draft-mode auth runs once per content read during admin preview) could be memoised with React `cache()`. It only affects preview. L5 is already covered.
+- **Notes:**
+  - Heading accents no longer auto-hyphenate inside a name ("Es-sen-Borbeck").
+  - After schema changes the dev DB needs a push (`pnpm dev` once) before `pnpm build`, which prerenders `/` against it.
+  - The dev DB has the new schema but not the new seed data. `pnpm seed` fills the teaser and the Jugend-Yoga link, but it resets admin edits.
+
 - `CoursesPage`: hero, photo cards, "Was benötige ich?", `TeacherTrainingTeaser`, trial offer.
 - `CoursePage` (`[slug]`): one template with hero, audience, steps, benefits, optional `CourseSchedule`, `TeacherCard`, `TeacherTrainingTeaser`, `FaqList` (`details`/`summary`), related courses.
 - Add the `teacher-training` global, which the teaser needs (price, start month, facts).

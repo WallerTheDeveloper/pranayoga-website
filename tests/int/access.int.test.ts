@@ -95,6 +95,44 @@ describe('anonymous visitors', () => {
   })
 })
 
+describe('teacher training global', () => {
+  it('anonymous visitors read the published version, never the draft', async () => {
+    const system = { overrideAccess: true, context: { disableRevalidate: true } } as const
+    await payload.updateGlobal({
+      slug: 'teacher-training',
+      data: { teaser: { heading: 'Öffentlich' }, _status: 'published' },
+      draft: false,
+      ...system,
+    })
+    await payload.updateGlobal({
+      slug: 'teacher-training',
+      data: { teaser: { heading: 'Geheimer Entwurf' } },
+      draft: true,
+      ...system,
+    })
+    for (const draft of [false, true]) {
+      const doc = await payload.findGlobal({
+        slug: 'teacher-training',
+        draft,
+        overrideAccess: false,
+      })
+      expect(doc.teaser?.heading).toBe('Öffentlich')
+    }
+    const asAdmin = await payload.findGlobal({ slug: 'teacher-training', draft: true, user: admin })
+    expect(asAdmin.teaser.heading).toBe('Geheimer Entwurf')
+  })
+
+  it('anonymous visitors cannot update it', async () => {
+    await expect(
+      payload.updateGlobal({
+        slug: 'teacher-training',
+        data: { price: 1 },
+        overrideAccess: false,
+      }),
+    ).rejects.toMatchObject({ status: 403 })
+  })
+})
+
 describe('logged-in admins', () => {
   it('see drafts and published documents', async () => {
     const result = await payload.find({

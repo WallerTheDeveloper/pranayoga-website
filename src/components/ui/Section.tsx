@@ -10,8 +10,8 @@ interface SectionProps {
   paper?: boolean
   flushTop?: boolean
   flushBottom?: boolean
-  /** Stacks the children with the 48 px section rhythm. */
-  stack?: boolean
+  /** Stacks the children with the 48 px section rhythm; 'wide' for whole blocks (56–96 px). */
+  stack?: boolean | 'wide'
   labelledBy?: string
   className?: string
   innerClassName?: string
@@ -43,6 +43,7 @@ export function Section({
     flushTop ? styles.flushTop : '',
     flushBottom ? styles.flushBottom : '',
     stack ? styles.stack : '',
+    stack === 'wide' ? styles.wide : '',
     innerClassName ?? '',
   ]
     .filter(Boolean)

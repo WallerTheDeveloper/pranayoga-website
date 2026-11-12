@@ -87,16 +87,28 @@ export async function seedCourseDocs(ctx: SeedContext): Promise<Map<string, numb
   return ids
 }
 
+/** Course id for a seed block's `courseSlug`; the slug must be one of the seeded courses. */
+function linkedCourseId(courseIds: ReadonlyMap<string, number>, slug: string | undefined) {
+  if (slug === undefined) return null
+  const id = courseIds.get(slug)
+  if (id === undefined) throw new Error(`Price block links to an unknown course: ${slug}`)
+  return id
+}
+
 /** Upserts price groups by title. The trial group comes first, so the one-trial rule holds. */
-export async function seedPriceGroupDocs(ctx: SeedContext): Promise<void> {
+export async function seedPriceGroupDocs(
+  ctx: SeedContext,
+  courseIds: ReadonlyMap<string, number>,
+): Promise<void> {
   for (const [index, group] of seedPriceGroups.entries()) {
     const data = {
       kicker: group.kicker,
       title: group.title,
       description: group.description ?? null,
-      blocks: group.blocks.map((block) => ({
+      blocks: group.blocks.map(({ courseSlug, ...block }) => ({
         ...block,
         inclusions: block.inclusions?.map((row) => ({ ...row })) ?? [],
+        course: linkedCourseId(courseIds, courseSlug),
       })),
       order: index + 1,
       _status: 'published' as const,

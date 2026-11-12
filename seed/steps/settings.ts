@@ -2,15 +2,29 @@ import { homeCopy } from '@/content/copy/home'
 import { getServerEnv } from '@/lib/env'
 
 import { seedBusinessSettings, seedTechnicalDefaults } from '../data/settings'
+import { seedTeacherTraining } from '../data/teacherTraining'
 import { mediaId, SEED_WRITE, type SeedContext } from './context'
 
 const PUBLISH = { ...SEED_WRITE, draft: false } as const
 
-/** Publishes both globals. The site URL comes from the environment the seed runs in. */
+/** Publishes the globals. The site URL comes from the environment the seed runs in. */
 export async function seedGlobals(ctx: SeedContext): Promise<void> {
   await ctx.payload.updateGlobal({
     slug: 'business-settings',
     data: { ...seedBusinessSettings, _status: 'published' },
+    ...PUBLISH,
+  })
+
+  await ctx.payload.updateGlobal({
+    slug: 'teacher-training',
+    data: {
+      ...seedTeacherTraining,
+      teaser: {
+        ...seedTeacherTraining.teaser,
+        facts: seedTeacherTraining.teaser.facts?.map((fact) => ({ ...fact })) ?? [],
+      },
+      _status: 'published',
+    },
     ...PUBLISH,
   })
 
@@ -29,5 +43,5 @@ export async function seedGlobals(ctx: SeedContext): Promise<void> {
     },
     ...PUBLISH,
   })
-  ctx.payload.logger.info('Globals: business-settings, technical-settings')
+  ctx.payload.logger.info('Globals: business-settings, teacher-training, technical-settings')
 }

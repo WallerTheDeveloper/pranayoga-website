@@ -8,6 +8,7 @@ import type { Course } from '@/payload-types'
 import type {
   CourseBadge,
   CourseDetail,
+  CoursePriceLine,
   CourseStep,
   CourseSummary,
   FaqEntry,
@@ -37,6 +38,7 @@ export function toCourseSummary(doc: Course): CourseSummary | null {
     badge: toBadge(doc.badge),
     cardTeaser: cleanText(doc.cardTeaser) ?? '',
     cardImage: toImage(doc.cardImage, 'card'),
+    audienceLabel: cleanText(doc.hero?.audienceLabel),
   }
 }
 
@@ -98,6 +100,8 @@ export function toSeo(seo: Course['seo'] | null | undefined): SeoData {
 
 export interface CourseDetailContext {
   trialPriceLabel: string | null
+  /** Price lines by course id, from `coursePriceLines()`. */
+  priceLines: ReadonlyMap<number, CoursePriceLine>
 }
 
 export function toCourseDetail(doc: Course, context: CourseDetailContext): CourseDetail | null {
@@ -108,10 +112,10 @@ export function toCourseDetail(doc: Course, context: CourseDetailContext): Cours
     hero: {
       eyebrow: cleanText(doc.hero?.eyebrow),
       lead: cleanText(doc.hero?.lead) ?? '',
-      audienceLabel: cleanText(doc.hero?.audienceLabel),
       image: toImage(doc.hero?.image, 'feature'),
       secondaryImage: toImage(doc.hero?.secondaryImage, 'card'),
     },
+    priceLine: context.priceLines.get(doc.id) ?? null,
     audience: {
       heading: cleanText(doc.audience?.heading),
       paragraphs: asArray(doc.audience?.paragraphs)

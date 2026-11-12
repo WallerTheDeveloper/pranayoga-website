@@ -237,6 +237,18 @@ export const PriceGroups: CollectionConfig = {
             },
           ],
         },
+        {
+          name: 'course',
+          type: 'relationship',
+          relationTo: 'courses',
+          label: label('Preis auf einer Kursseite zeigen', 'Show the price on a course page'),
+          admin: {
+            description: label(
+              'Optional. Der Preis erscheint dann oben auf dieser Kursseite, z. B. „Yoga für Jugendliche: 45 €“.',
+              'Optional. The price then appears at the top of that course page.',
+            ),
+          },
+        },
       ],
     },
     orderField(),

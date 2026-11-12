@@ -1,0 +1,37 @@
+/* Sand card with a small portrait (course pages, next to "Was Sie mitbringen"). */
+.root {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 24px;
+  border-radius: var(--radius-card);
+  background: var(--color-sand);
+}
+
+.portrait {
+  flex: none;
+  width: 96px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.15;
+}
+
+.credentials {
+  margin: 0;
+  font-size: var(--text-meta);
+  color: var(--color-ink-muted);
+}
+
+.more {
+  align-self: flex-start;
+}

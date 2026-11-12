@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { Heading } from '@/components/ui/Heading'
 import type { ContactData, TrialOffer as TrialOfferData } from '@/content/types'
@@ -13,7 +15,11 @@ interface TrialOfferProps {
   text: string
   groupUrl: string | null
   contact: ContactData
+  /** Line under the WhatsApp button; defaults to the shared hint. */
+  hint?: string
   headingId?: string
+  /** Shown above the booking block, e.g. a course's schedule. */
+  children?: ReactNode
 }
 
 /** "Probestunde für 15 €" with the booking block. Without a price the heading is just the name. */
@@ -24,7 +30,9 @@ export function TrialOffer({
   text,
   groupUrl,
   contact,
+  hint,
   headingId,
+  children,
 }: TrialOfferProps) {
   return (
     <div className={`${styles.panel} paper`}>
@@ -45,12 +53,10 @@ export function TrialOffer({
         </Heading>
         <p className={styles.description}>{text}</p>
       </div>
-      <WhatsAppBand
-        className={styles.booking}
-        groupUrl={groupUrl}
-        contact={contact}
-        personalPrompt={false}
-      />
+      <div className={styles.booking}>
+        {children}
+        <WhatsAppBand groupUrl={groupUrl} contact={contact} personalPrompt={false} hint={hint} />
+      </div>
     </div>
   )
 }

@@ -1,0 +1,46 @@
+/* Linen note under the course grid with the WhatsApp button. */
+.root {
+  margin-top: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px 48px;
+  padding: 32px;
+  border-radius: var(--radius-card);
+  background: var(--color-linen);
+}
+
+.copy {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex: 1 1 420px;
+  min-width: 0;
+}
+
+.icon {
+  flex: none;
+  margin-top: 4px;
+  color: var(--color-moss);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.heading {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
+}
+
+.body {
+  margin: 0;
+  max-width: 640px;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-ink-muted);
+}

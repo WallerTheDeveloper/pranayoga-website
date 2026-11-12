@@ -69,4 +69,6 @@ export const sharedCopy = {
     label: 'Sie sind hier',
     home: 'Startseite',
   },
+  /** "Was benötige ich?" on Kurse and "Was Sie mitbringen" on every course page. */
+  bringAlong: ['Eigene Yogamatte', 'Bequeme Kleidung', 'Gute Laune'],
 } as const

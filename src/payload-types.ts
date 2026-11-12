@@ -97,10 +97,12 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'business-settings': BusinessSetting;
+    'teacher-training': TeacherTraining;
     'technical-settings': TechnicalSetting;
   };
   globalsSelect: {
     'business-settings': BusinessSettingsSelect<false> | BusinessSettingsSelect<true>;
+    'teacher-training': TeacherTrainingSelect<false> | TeacherTrainingSelect<true>;
     'technical-settings': TechnicalSettingsSelect<false> | TechnicalSettingsSelect<true>;
   };
   locale: null;
@@ -348,6 +350,10 @@ export interface PriceGroup {
         highlighted?: boolean | null;
         isTrial?: boolean | null;
         showInSignupForm?: boolean | null;
+        /**
+         * Optional. The price then appears at the top of that course page.
+         */
+        course?: (number | null) | Course;
         id?: string | null;
       }[]
     | null;
@@ -638,6 +644,7 @@ export interface PriceGroupsSelect<T extends boolean = true> {
         highlighted?: T;
         isTrial?: T;
         showInSignupForm?: T;
+        course?: T;
         id?: T;
       };
   order?: T;
@@ -844,6 +851,53 @@ export interface BusinessSetting {
   createdAt?: string | null;
 }
 /**
+ * Start, price and the teaser block on the course pages and the course overview.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "teacher-training".
+ */
+export interface TeacherTraining {
+  id: number;
+  /**
+   * Empty = the start is not mentioned.
+   */
+  startMonth?: string | null;
+  /**
+   * Empty = not set yet; the price line is hidden.
+   */
+  price?: number | null;
+  /**
+   * Green block with the "Zur Yogaausbildung" button on every course page and the overview.
+   */
+  teaser: {
+    heading: string;
+    text?: string | null;
+    /**
+     * Up to three lines next to the text. The price follows as the last line.
+     */
+    facts?:
+      | {
+          /**
+           * e.g. "200 Stunden"
+           */
+          value: string;
+          /**
+           * e.g. "Theorie und Praxis"
+           */
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * e.g. "inkl. Arbeitsmaterial, Ratenzahlung nach Absprache"
+     */
+    priceNote?: string | null;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * Technical settings. Change only after checking with the developer.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -920,6 +974,32 @@ export interface BusinessSettingsSelect<T extends boolean = true> {
         bankName?: T;
         iban?: T;
         paymentReference?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "teacher-training_select".
+ */
+export interface TeacherTrainingSelect<T extends boolean = true> {
+  startMonth?: T;
+  price?: T;
+  teaser?:
+    | T
+    | {
+        heading?: T;
+        text?: T;
+        facts?:
+          | T
+          | {
+              value?: T;
+              label?: T;
+              id?: T;
+            };
+        priceNote?: T;
       };
   _status?: T;
   updatedAt?: T;

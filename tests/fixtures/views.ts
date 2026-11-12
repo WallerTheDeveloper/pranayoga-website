@@ -1,7 +1,13 @@
 import { COPY_MEDIA_KEYS } from '@/content/copy/mediaRefs'
 import { toBusinessSettings } from '@/content/mappers/settings'
 import type { CopyImages } from '@/content/media'
-import type { BusinessSettingsView, CourseSummary, ImageData } from '@/content/types'
+import type {
+  BusinessSettingsView,
+  CourseDetail,
+  CourseSummary,
+  ImageData,
+  TeacherTrainingView,
+} from '@/content/types'
 
 /** View models for component tests. */
 
@@ -53,6 +59,7 @@ export function courseSummary(overrides: Partial<CourseSummary> = {}): CourseSum
     badge: null,
     cardTeaser: 'Gleichgewicht zwischen Körper und Geist.',
     cardImage: imageData(),
+    audienceLabel: 'Für jeden geeignet',
     ...overrides,
   }
 }
@@ -68,3 +75,60 @@ export const COURSES: readonly CourseSummary[] = [
     badge: { text: 'Neu', tone: 'dark' },
   }),
 ]
+
+export function courseDetail(overrides: Partial<CourseDetail> = {}): CourseDetail {
+  return {
+    ...courseSummary(),
+    hero: {
+      eyebrow: 'Sanft und kräftigend',
+      lead: 'Hatha Yoga verbindet Haltungen, Atmung und Entspannung.',
+      image: imageData({ width: 900, height: 600, alt: 'Hatha Yoga im Studio' }),
+      secondaryImage: imageData({ alt: 'Boot-Haltung' }),
+    },
+    priceLine: null,
+    audience: {
+      heading: 'Für wen ist der Kurs?',
+      paragraphs: ['Für Einsteiger und Geübte.', 'Jede Haltung lässt sich anpassen.'],
+      quote: null,
+    },
+    steps: {
+      heading: 'So läuft eine Stunde ab',
+      items: [
+        { title: 'Ankommen', text: 'Wir beginnen mit dem Atem.', image: null },
+        { title: 'Asanas', text: 'Haltungen im eigenen Tempo.', image: null },
+      ],
+    },
+    benefits: {
+      heading: 'Was Hatha Yoga bewirkt',
+      items: [{ title: 'Beweglichkeit', text: 'Der Körper wird geschmeidiger.', image: null }],
+      sideImage: null,
+    },
+    schedule: [],
+    faqs: [
+      { question: 'Brauche ich Vorkenntnisse?', answer: 'Nein.' },
+      { question: 'Was kostet eine Probestunde?', answer: '15 €.' },
+    ],
+    seo: { title: null, description: null, image: null },
+    ...overrides,
+  }
+}
+
+export function teacherTrainingView(
+  overrides: Partial<TeacherTrainingView> = {},
+): TeacherTrainingView {
+  return {
+    startMonthLabel: 'März 2027',
+    price: 2400,
+    priceLabel: '2.400\u00a0€',
+    teaser: {
+      heading: 'Werden Sie selbst Yogalehrerin oder Yogalehrer.',
+      text: 'Lernen Sie bei Liudmyla Schiemann, selbst Yoga zu unterrichten.',
+      facts: [
+        { value: '200 Stunden', label: 'Theorie und Praxis' },
+        { value: '9 Wochenenden', label: 'ein Wochenende pro Monat im Studio' },
+      ],
+      priceNote: 'inkl. Arbeitsmaterial',
+    },
+    ...overrides,
+  }
+}

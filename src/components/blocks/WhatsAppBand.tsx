@@ -12,6 +12,8 @@ interface WhatsAppBandProps {
   contact: ContactData
   /** "Lieber persönlich?" before the chips and "E-Mail schreiben" (hero, menu); else the address. */
   personalPrompt?: boolean
+  /** Line under the button; the course pages word it differently from the default. */
+  hint?: string
   className?: string
 }
 
@@ -20,6 +22,7 @@ export function WhatsAppBand({
   groupUrl,
   contact,
   personalPrompt = true,
+  hint,
   className,
 }: WhatsAppBandProps) {
   const copy = sharedCopy.whatsApp
@@ -37,7 +40,7 @@ export function WhatsAppBand({
                 withArrow
               />
             </div>
-            <p className={styles.hint}>{copy.hint}</p>
+            <p className={styles.hint}>{hint ?? copy.hint}</p>
           </>
         )}
       </AdminValue>

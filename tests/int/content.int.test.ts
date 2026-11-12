@@ -10,7 +10,9 @@ import {
   getCourses,
   getPageCopy,
   getPriceGroups,
+  getRelatedCourses,
   getReviews,
+  getTeacherTraining,
   getTechnicalSettings,
   getTrialOffer,
 } from '@/content'
@@ -94,6 +96,26 @@ beforeAll(async () => {
     ...SYSTEM,
   })
   await payload.create({
+    collection: 'price-groups',
+    data: {
+      kicker: 'Kurse',
+      title: 'Kurspreise',
+      blocks: [
+        { name: 'Ohne Kurs', badge: 'none', action: 'whatsapp', price: 30 },
+        {
+          name: 'Kurs-Preis',
+          badge: 'none',
+          action: 'whatsapp',
+          price: 45,
+          unit: 'pro Monat',
+          course: live.id,
+        },
+      ],
+      _status: 'published',
+    },
+    ...SYSTEM,
+  })
+  await payload.create({
     collection: 'reviews',
     data: { author: 'Alex', text: 'Tolles Studio.', _status: 'published' },
     ...SYSTEM,
@@ -125,6 +147,28 @@ beforeAll(async () => {
   await payload.updateGlobal({
     slug: 'business-settings',
     data: { whatsApp: { groupUrl: 'https://chat.whatsapp.com/draft' } },
+    draft: true,
+    ...SYSTEM,
+  })
+  await payload.updateGlobal({
+    slug: 'teacher-training',
+    data: {
+      startMonth: '2027-03-01T00:00:00.000Z',
+      price: 2400,
+      teaser: {
+        heading: 'Live-Ausbildung',
+        text: 'Selbst unterrichten.',
+        facts: [{ value: '200 Stunden', label: 'Theorie und Praxis' }],
+        priceNote: null,
+      },
+      _status: 'published',
+    },
+    draft: false,
+    ...SYSTEM,
+  })
+  await payload.updateGlobal({
+    slug: 'teacher-training',
+    data: { teaser: { heading: 'Entwurf-Ausbildung' } },
     draft: true,
     ...SYSTEM,
   })
@@ -188,8 +232,66 @@ describe('published reads', () => {
     expect(await getCourse('../admin')).toBeNull()
   })
 
+  it('never caches a page entry for a slug that is not a listed course', async () => {
+    vi.mocked(unstable_cache).mockClear()
+    expect(await getCourse('not-a-course')).toBeNull()
+    const keys = vi.mocked(unstable_cache).mock.calls.map(([, key]) => key)
+    expect(keys).toContainEqual(['content', 'courses'])
+    expect(keys).not.toContainEqual(['content', 'course', 'not-a-course'])
+  })
+
+  it('caches a course page under its own tag, the price groups and media', async () => {
+    vi.mocked(unstable_cache).mockClear()
+    await getCourse('content-live')
+    expect(vi.mocked(unstable_cache)).toHaveBeenCalledWith(
+      expect.any(Function),
+      ['content', 'course', 'content-live'],
+      { tags: ['course:content-live', 'price-groups', 'media'], revalidate: false },
+    )
+  })
+
+  it('shows the price of a block linked to the course', async () => {
+    expect((await getCourse('content-live'))?.priceLine).toEqual({
+      name: 'Kurs-Preis',
+      priceLabel: '45 €',
+      unit: 'pro Monat',
+    })
+    expect((await getCourse('content-first'))?.priceLine).toBeNull()
+  })
+
+  it('picks related courses, falling back to the first ones', async () => {
+    expect((await getRelatedCourses('content-live')).map((course) => course.slug)).toEqual([
+      'content-first',
+    ])
+    expect((await getRelatedCourses('not-a-course')).map((course) => course.slug)).toEqual([
+      'content-first',
+      'content-live',
+    ])
+  })
+
+  it('reads the published teacher training, not the draft', async () => {
+    vi.mocked(unstable_cache).mockClear()
+    const training = await getTeacherTraining()
+    expect(training).toMatchObject({
+      startMonthLabel: 'März 2027',
+      price: 2400,
+      priceLabel: '2.400 €',
+      teaser: {
+        heading: 'Live-Ausbildung',
+        text: 'Selbst unterrichten.',
+        facts: [{ value: '200 Stunden', label: 'Theorie und Praxis' }],
+        priceNote: null,
+      },
+    })
+    expect(vi.mocked(unstable_cache)).toHaveBeenCalledWith(
+      expect.any(Function),
+      ['content', 'teacher-training'],
+      { tags: ['teacher-training'], revalidate: false },
+    )
+  })
+
   it('reads prices, the trial offer and reviews', async () => {
-    expect(await getPriceGroups()).toHaveLength(1)
+    expect(await getPriceGroups()).toHaveLength(2)
     expect(await getTrialOffer()).toMatchObject({
       name: 'Probestunde',
       price: 15,
@@ -251,6 +353,7 @@ describe('draft mode', () => {
     expect((await getCourses()).map((course) => course.slug)).toContain('content-draft')
     expect((await getReviews()).map((review) => review.author)).toContain('Entwurf')
     expect((await getBusinessSettings()).whatsApp.groupUrl).toBe('https://chat.whatsapp.com/draft')
+    expect((await getTeacherTraining())?.teaser.heading).toBe('Entwurf-Ausbildung')
     expect(vi.mocked(unstable_cache)).not.toHaveBeenCalled()
   })
 })

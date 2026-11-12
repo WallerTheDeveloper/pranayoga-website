@@ -16,6 +16,7 @@ import { redirectsPluginConfig } from './collections/redirects'
 import { Reviews } from './collections/Reviews'
 import { Users } from './collections/Users'
 import { BusinessSettings } from './globals/BusinessSettings'
+import { TeacherTraining } from './globals/TeacherTraining'
 import { TechnicalSettings } from './globals/TechnicalSettings'
 import { getServerEnv } from './lib/env'
 import { previewPathFor, previewUrl } from './lib/preview'
@@ -38,7 +39,7 @@ export default buildConfig({
     meta: { titleSuffix: ' · Pranayoga Admin' },
     livePreview: {
       collections: [Courses.slug, PriceGroups.slug, Reviews.slug],
-      globals: [BusinessSettings.slug],
+      globals: [BusinessSettings.slug, TeacherTraining.slug],
       breakpoints: [
         { name: 'mobile', label: 'Handy', width: 390, height: 844 },
         { name: 'tablet', label: 'Tablet', width: 768, height: 1024 },
@@ -64,7 +65,7 @@ export default buildConfig({
     fallbackLanguage: 'de',
   },
   collections: [Courses, PriceGroups, Reviews, Media, Users],
-  globals: [BusinessSettings, TechnicalSettings],
+  globals: [BusinessSettings, TeacherTraining, TechnicalSettings],
   editor: lexicalEditor(),
   graphQL: { disable: true },
   cors: [env.NEXT_PUBLIC_SERVER_URL],

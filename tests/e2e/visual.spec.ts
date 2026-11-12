@@ -1,5 +1,6 @@
 import { test } from '@playwright/test'
 
+import { seedCourses } from '../../seed/data/courses'
 import { settle } from './settle'
 
 /**
@@ -17,4 +18,33 @@ test('home at 390 @mobile', async ({ page }) => {
   await page.goto('/')
   await settle(page)
   await page.screenshot({ path: 'test-results/visual/home-390.png', fullPage: true })
+})
+
+test('course overview at 1440', async ({ page }) => {
+  await page.goto('/kurse/')
+  await settle(page)
+  await page.screenshot({ path: 'test-results/visual/kurse-1440.png', fullPage: true })
+})
+
+test('course overview at 390 @mobile', async ({ page }) => {
+  await page.goto('/kurse/')
+  await settle(page)
+  await page.screenshot({ path: 'test-results/visual/kurse-390.png', fullPage: true })
+})
+
+for (const course of seedCourses) {
+  test(`${course.title} at 1440`, async ({ page }) => {
+    await page.goto(`/kurse/${course.slug}/`)
+    await settle(page)
+    await page.screenshot({
+      path: `test-results/visual/kurs-${course.slug}-1440.png`,
+      fullPage: true,
+    })
+  })
+}
+
+test('course page at 390 @mobile', async ({ page }) => {
+  await page.goto('/kurse/hatha-yoga/')
+  await settle(page)
+  await page.screenshot({ path: 'test-results/visual/kurs-hatha-yoga-390.png', fullPage: true })
 })

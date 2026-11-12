@@ -1,0 +1,50 @@
+/* Course hero details: icon + eyebrow row, audience tag, price line. */
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.facts {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* The design's `.tag` on sand. */
+.fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-sand);
+  color: var(--color-ink);
+  font-size: var(--text-label);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.term {
+  font-weight: 400;
+  color: var(--color-ink-muted);
+}
+
+.term::after {
+  content: ':';
+}
+
+.value {
+  margin: 0;
+}
+
+.price {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 6px;
+  font-size: 17px;
+  color: var(--color-ink);
+}

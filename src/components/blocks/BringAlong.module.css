@@ -1,0 +1,46 @@
+/* "Was benötige ich?" / "Was Sie mitbringen": ticked list and its outlined card. */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.regular {
+  gap: 12px;
+  font-size: var(--text-body);
+}
+
+.large {
+  margin-top: 8px;
+  gap: 14px;
+  font-size: 19px;
+}
+
+.item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.icon {
+  flex: none;
+  color: var(--color-moss);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+  border-radius: var(--radius-card);
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+
+.heading {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 400;
+}

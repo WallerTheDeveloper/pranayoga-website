@@ -33,6 +33,8 @@ export interface CourseSummary {
   badge: CourseBadge | null
   cardTeaser: string
   cardImage: ImageData | null
+  /** "Für jeden geeignet": the overview cards' "Für wen" line and the hero tag. */
+  audienceLabel: string | null
 }
 
 export interface CourseStep {
@@ -58,14 +60,22 @@ export interface SeoData {
   image: ImageData | null
 }
 
+/** A price block linked to a course, shown in its hero: "Yoga für Jugendliche: 45 €". */
+export interface CoursePriceLine {
+  name: string
+  priceLabel: string
+  unit: string | null
+}
+
 export interface CourseDetail extends CourseSummary {
   hero: {
     eyebrow: string | null
     lead: string
-    audienceLabel: string | null
     image: ImageData | null
     secondaryImage: ImageData | null
   }
+  /** Null unless a price block with a price points at this course. */
+  priceLine: CoursePriceLine | null
   audience: {
     heading: string | null
     paragraphs: string[]
@@ -94,6 +104,8 @@ export interface PriceBlockView {
   action: PriceAction
   isTrial: boolean
   showInSignupForm: boolean
+  /** The course whose page shows this price, if any. */
+  courseId: number | null
 }
 
 export interface PriceGroupView {
@@ -109,6 +121,25 @@ export interface TrialOffer {
   price: number | null
   priceLabel: string | null
   unit: string | null
+}
+
+export interface TeacherTrainingFact {
+  value: string
+  label: string
+}
+
+/** The teacher training: what the shared teaser shows (phase 3 adds the page's own data). */
+export interface TeacherTrainingView {
+  /** "März 2027"; null when no start month is set. */
+  startMonthLabel: string | null
+  price: number | null
+  priceLabel: string | null
+  teaser: {
+    heading: string
+    text: string | null
+    facts: TeacherTrainingFact[]
+    priceNote: string | null
+  }
 }
 
 export interface ReviewView {

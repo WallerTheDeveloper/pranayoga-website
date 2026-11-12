@@ -107,7 +107,7 @@ describe('toSeo and toCourseDetail', () => {
         },
         faqs: [{ question: 'Preis?', answer: '[Preis Probestunde]' }],
       }),
-      { trialPriceLabel: '15 €' },
+      { trialPriceLabel: '15 €', priceLines: new Map() },
     )
     expect(detail?.hero.image?.width).toBe(760)
     expect(detail?.hero.secondaryImage).toBeNull()
@@ -121,7 +121,9 @@ describe('toSeo and toCourseDetail', () => {
   })
 
   it('returns null when the summary is invalid', () => {
-    expect(toCourseDetail(courseDoc({ title: '' }), { trialPriceLabel: null })).toBeNull()
+    expect(
+      toCourseDetail(courseDoc({ title: '' }), { trialPriceLabel: null, priceLines: new Map() }),
+    ).toBeNull()
   })
 })
 

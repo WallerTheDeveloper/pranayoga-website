@@ -5,7 +5,10 @@ import type { PriceGroup } from '../../src/payload-types'
  * site hides every price line until the admin fills them in. Inclusions in [brackets] are hidden too.
  */
 
-type SeedBlock = Omit<NonNullable<PriceGroup['blocks']>[number], 'id'>
+/** A block as in Payload, but linked to its course by slug: ids exist only after the course step. */
+type SeedBlock = Omit<NonNullable<PriceGroup['blocks']>[number], 'id' | 'course'> & {
+  courseSlug?: string
+}
 
 export interface SeedPriceGroup {
   kicker: string
@@ -98,6 +101,7 @@ export const seedPriceGroups: SeedPriceGroup[] = [
         inclusions: inclusions('Für Jugendliche ab 14 Jahren'),
         action: 'signup',
         showInSignupForm: true,
+        courseSlug: 'yoga-fuer-jugendliche',
       }),
     ],
   },

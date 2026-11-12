@@ -1,6 +1,9 @@
+import { courseCopy } from './copy/course'
+import { coursesCopy } from './copy/courses'
 import { homeCopy } from './copy/home'
 import { sharedCopy } from './copy/shared'
 import { teacherCopy } from './copy/teacher'
+import { teacherTrainingCopy } from './copy/teacherTraining'
 
 /**
  * Typed German copy behind the same repository interface as the admin data (docs/PLAN.md
@@ -8,8 +11,11 @@ import { teacherCopy } from './copy/teacher'
  */
 const pageCopy = {
   home: homeCopy,
+  courses: coursesCopy,
+  course: courseCopy,
   shared: sharedCopy,
   teacher: teacherCopy,
+  teacherTraining: teacherTrainingCopy,
 } as const
 
 export type PageCopyKey = keyof typeof pageCopy
