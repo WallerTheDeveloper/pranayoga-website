@@ -296,6 +296,11 @@ This is a guardrail against mistakes, not a security sandbox.
 - **From the Phase 1 review:** `getCourse` caches `null` for any well-formed unknown slug under `course:<slug>`, with no expiry. Before the course route goes live, check the slug against `getCourses()` first, so random URLs can't grow the cache.
 
 ## Phase 3: remaining pages, forms, motion → review
+
+**Decided before the start (2026-11-12):**
+- **Forms stay UI only in Phase 3.** Anmeldeformular and Kontakt validate and show a success state but send nothing. Sending (email through a Payload email adapter, which "forgot password" needs too) is a before-launch item.
+- **Mobile menu without JavaScript:** until hydration, the menu button is a plain link to an anchor at the footer navigation, which already lists every page. After hydration it opens the dialog as today.
+- **Error pages:** `error.tsx` and `global-error.tsx` reuse the 404 layout (`Fehler-404.dc.html`) with their own German copy, "Etwas ist schiefgelaufen", and a reload link. The design has no separate board for them.
 - **`AboutPage`:** gallery and certificate `Lightbox` (keyboard, focus trap, counter).
 - **`TeacherTrainingPage`:** "Fragen per WhatsApp" opens the personal chat; `MobileActionBar` switches.
 - **`PricingPage`:** price groups; signup steps; `downloads` collection (contract); bank details with `IbanCopyButton`.
@@ -306,8 +311,8 @@ This is a guardrail against mistakes, not a security sandbox.
 - **`ContactPage`:** UI-only form; `MapConsent` with the Google Maps embed loaded after a click (see "Map"). E2E: no request to Google before the click, the iframe after it.
 - **Legal pages and 404:** `legal-notice` and `privacy-policy` as rich-text (Lexical) globals; `NotFoundPage`.
 - **Sitemap and robots.**
-- **Error pages (from the Phase 1 review):** `global-error.tsx` and `error.tsx` with German copy and a reload link; today a database outage shows Next's default 500 page.
-- **Mobile menu without JavaScript (from the Phase 1 review):** the menu button needs hydration. Decide whether the header nav stays visible until then, as the courses dropdown already does.
+- **Error pages (from the Phase 1 review):** `global-error.tsx` and `error.tsx` with German copy and a reload link, in the 404 layout (see "Decided before the start"). Today a database outage shows Next's default 500 page.
+- **Mobile menu without JavaScript (from the Phase 1 review):** the menu button needs hydration. Until then it links to the footer navigation (see "Decided before the start").
 - **Motion:**
   - `ScrollReveal`: fade over 0.7 s, rise 28 px over 1 s, 80 ms stagger, plays once.
   - First-visit `IntroLoader` (≤1.2 s) and 240 ms page crossfade (View Transitions).
@@ -328,5 +333,5 @@ This is a guardrail against mistakes, not a security sandbox.
 Stay on OVH. The client keeps her Web Hosting plan for the domain and email, and buys a VPS-1 (2 vCores, 4 GB, 40 GB NVMe) when we reach the hosting phase. That server runs Docker Compose (app + Postgres + Caddy), with images built in CI. Uploads are bind-mounted from the server's disk, and Postgres uses a volume on the same disk (see "Media & file storage"). Nightly backups (`pg_dump` plus `uploads/`) go to the client's existing OVH Web Hosting space, so no new service is needed. After each deploy, a warm-up script requests every sitemap URL to fill the cache. Because the page cache lives only in memory (`isrFlushToDisk: false`, Phase 2), every container start first calls a secured "revalidate everything" route handler (a secret from env, constant-time compare, POST only, rate-limited). Then the warm-up runs. Without that step, pages prerendered at build would serve build-time HTML after an unplanned restart. Not part of this plan's phases. Keep the code host-agnostic: env-based config and a Dockerfile added in the hosting phase.
 
 From the Phase 1 review, before launch:
-- Add a Payload email adapter. Without one, "forgot password" has nowhere to send the link.
+- Add a Payload email adapter. Without one, "forgot password" has nowhere to send the link. The same adapter sends the Anmeldeformular and Kontakt submissions, which are UI only until then (decided 2026-11-12).
 - `GET /api/media` lists every media doc, including images used only in drafts. The file route needs public read; filter only the list endpoint if that matters.
