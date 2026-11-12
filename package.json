@@ -1,0 +1,74 @@
+{
+  "name": "pranayoga-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prana Yoga Studio Essen: website and admin (Next.js + Payload)",
+  "type": "module",
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=24.22.1"
+  },
+  "scripts": {
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "build": "node scripts/clear-data-cache.mjs && cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx seed/seed.ts",
+    "test": "cross-env NODE_OPTIONS=--no-deprecation vitest run",
+    "test:unit": "cross-env NODE_OPTIONS=--no-deprecation vitest run --project unit",
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --project int",
+    "test:watch": "cross-env NODE_OPTIONS=--no-deprecation vitest",
+    "e2e": "cross-env NODE_OPTIONS=--no-deprecation playwright test",
+    "hooks:test": "node --test \".claude/hooks/**/*.test.mjs\""
+  },
+  "dependencies": {
+    "@payloadcms/db-postgres": "3.93.0",
+    "@payloadcms/live-preview-react": "3.93.0",
+    "@payloadcms/next": "3.93.0",
+    "@payloadcms/plugin-redirects": "3.93.0",
+    "@payloadcms/richtext-lexical": "3.93.0",
+    "@payloadcms/translations": "3.93.0",
+    "@payloadcms/ui": "3.93.0",
+    "graphql": "^16.8.1",
+    "next": "16.4.6",
+    "payload": "3.93.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "sharp": "0.35.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@next/env": "16.4.6",
+    "@playwright/test": "^1.65.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "~14.6.8",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "@vitest/coverage-v8": "5.1.0",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "16.4.6",
+    "jsdom": "^31.0.0",
+    "prettier": "~3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vitest": "5.1.0"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.22.3",
+      "onFail": "download"
+    }
+  }
+}
