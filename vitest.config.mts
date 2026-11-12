@@ -1,0 +1,48 @@
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: { tsconfigPaths: true },
+  test: {
+    globals: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text-summary', 'text', 'html'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/payload-types.ts',
+        // Next route files are covered by the Playwright suite.
+        'src/app/**',
+        // Static copy modules: plain data, no logic.
+        'src/content/copy/**',
+      ],
+      thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
+    },
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          environment: 'jsdom',
+          include: ['tests/unit/**/*.test.{ts,tsx}'],
+          setupFiles: ['./tests/setup/unit.ts'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'int',
+          environment: 'node',
+          include: ['tests/int/**/*.int.test.ts'],
+          setupFiles: ['./tests/setup/int.ts'],
+          // One Payload instance and one database: run files one after another.
+          fileParallelism: false,
+          testTimeout: 30_000,
+          hookTimeout: 120_000,
+        },
+      },
+    ],
+  },
+})
