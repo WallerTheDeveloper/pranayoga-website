@@ -1,0 +1,41 @@
+# Local databases for development and integration tests.
+# Ports 5433/5434 keep clear of a locally installed PostgreSQL on 5432.
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pranayoga
+      POSTGRES_PASSWORD: pranayoga
+      POSTGRES_DB: pranayoga
+    ports:
+      - '127.0.0.1:5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U pranayoga -d pranayoga']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Throwaway database for Vitest integration tests and Playwright runs.
+  # tmpfs: nothing is kept between container restarts.
+  db-test:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pranayoga
+      POSTGRES_PASSWORD: pranayoga
+      POSTGRES_DB: pranayoga_test
+    ports:
+      - '127.0.0.1:5434:5432'
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U pranayoga -d pranayoga_test']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
