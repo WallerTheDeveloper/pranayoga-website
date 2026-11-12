@@ -1,0 +1,46 @@
+/* Fixed bottom bar on phones (design `.mbar`, `.mbtn`). */
+.root {
+  display: none;
+}
+
+.square {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 58px;
+  height: 56px;
+  flex: none;
+  border-radius: var(--radius-card);
+  border: 1.5px solid var(--line-button);
+  background: var(--color-linen);
+  color: var(--color-ink);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.1;
+  text-decoration: none;
+}
+
+.square:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@container page (max-width: 700px) {
+  .root {
+    display: flex;
+    align-items: center;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    gap: 8px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(246, 240, 230, 0.97);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(42, 33, 27, 0.12);
+  }
+}

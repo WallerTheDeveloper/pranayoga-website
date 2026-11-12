@@ -1,0 +1,98 @@
+/*
+ * Design tokens, ported from the direction sheet (Main.dc.html §02–§06).
+ * Names are English (see docs/PLAN.md "Naming map").
+ *
+ * Breakpoints are container queries on the `.page` container (named `page`):
+ *   1180px  desktop nav → "Menü" button
+ *    960px  two-column grids → one column
+ *    760px  two-up card rows → one column
+ *    700px  phone: contact bar hidden, bottom action bar shown
+ * Custom properties cannot be used inside @container conditions, so the
+ * numbers above are repeated literally in the component modules.
+ */
+:root {
+  /* Palette */
+  --color-linen: #f6f0e6;
+  --color-sand: #ebdfcc;
+  --color-clay: #d6bfa3;
+  --color-rose: #e4c9bc;
+  --color-moss: #2e5b3e;
+  --color-moss-light: #dce7dc;
+  --color-logo-green: #2f8a4b;
+  --color-ink: #2a211b;
+  --color-ink-muted: #5a4c41;
+  --color-terracotta: #a4432a;
+  --color-terracotta-dark: #86341f;
+  --color-white: #ffffff;
+  --color-error: #9b2c2c;
+  --color-field-border: #8a7d72;
+  --color-placeholder: #7a6d62;
+  --color-photo-wash: #b07a55;
+
+  /* Lines and shadows (ink at low alpha) */
+  --line-faint: rgba(42, 33, 27, 0.08);
+  --line-soft: rgba(42, 33, 27, 0.12);
+  --line: rgba(42, 33, 27, 0.14);
+  --line-strong: rgba(42, 33, 27, 0.22);
+  --line-button: rgba(42, 33, 27, 0.25);
+  --hover-tint: rgba(42, 33, 27, 0.06);
+  --shadow-card: 0 18px 40px -24px rgba(42, 33, 27, 0.45);
+  --shadow-panel: 0 28px 60px -28px rgba(42, 33, 27, 0.5), inset 0 0 0 1px rgba(42, 33, 27, 0.08);
+
+  /* Fonts (next/font sets --font-fraunces and --font-atkinson on <html>) */
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: var(--font-atkinson), ui-sans-serif, system-ui, sans-serif;
+  --serif-variation: 'SOFT' 100, 'WONK' 0;
+
+  /* Type scale · desktop / phone, fluid on the page container (cqi) */
+  --text-display: clamp(44px, 6.2cqi, 88px);
+  --text-h1: clamp(40px, 4.4cqi, 64px);
+  --text-h2: clamp(34px, 3.4cqi, 48px);
+  --text-h3: 28px;
+  --text-h3-small: clamp(24px, 2.2cqi, 30px);
+  --text-lead: clamp(19px, 1.55cqi, 22px);
+  --text-body: 18px;
+  --text-meta: 16px;
+  --text-small: 15px;
+  --text-label: 15px;
+  --text-button: 18px;
+
+  --leading-display: 1.03;
+  --leading-h1: 1.05;
+  --leading-h2: 1.08;
+  --leading-h3: 1.2;
+  --leading-lead: 1.5;
+  --leading-body: 1.6;
+
+  /* Motion (Main.dc.html §06) */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-color: 0.2s;
+  --duration-lift: 0.5s;
+  --duration-zoom: 1.2s;
+
+  /* Shape */
+  --radius-photo: 6px;
+  --radius-card: 14px;
+  --radius-pill: 999px;
+
+  /* Focus ring: 3 px ink with a 3 px gap, always visible */
+  --focus-ring: 3px solid var(--color-ink);
+  --focus-offset: 3px;
+
+  /* Layout */
+  --content-max: 1280px;
+  --bar-max: 1360px;
+  --gutter: clamp(20px, 5.5cqi, 80px);
+  --bar-gutter: clamp(20px, 2.8cqi, 40px);
+  --section-space: clamp(64px, 8cqi, 128px);
+  /* Room kept free when the browser scrolls a focused or linked element into view: the sticky
+     header (~79 px) and the phone action bar (~77 px), each plus a little air. */
+  --header-clearance: 96px;
+  --action-bar-clearance: 92px;
+
+  /* Photo tiers (Main.dc.html §04): rendered size ≤ source ÷ 1.5 */
+  --tier-feature-width: 600px;
+  --tier-card-width: 440px;
+  --tier-small-width: 330px;
+}

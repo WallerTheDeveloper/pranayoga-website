@@ -1,0 +1,70 @@
+/*
+ * The 3-layer photo recipe (design `.ph`): a warm grade on the image, a terracotta colour wash and
+ * the paper grain on top, plus a slow zoom on hover. ContainedImage (`.im`) skips the treatment and
+ * fits the whole image on white (seals, certificates).
+ */
+.root,
+.contained {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--radius-photo);
+  background: var(--color-clay);
+  transform: translateZ(0);
+}
+
+.root img,
+.contained img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-zoom) var(--ease-out);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.root img {
+  filter: sepia(0.14) saturate(0.88) contrast(0.93) brightness(1.03);
+}
+
+.root::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-photo-wash);
+  mix-blend-mode: color;
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/brand/grain.png');
+  background-size: 256px;
+  mix-blend-mode: overlay;
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.zoom:hover img {
+  transform: scale(1.04);
+}
+
+.contained {
+  background: var(--color-white);
+}
+
+.contained img {
+  object-fit: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zoom:hover img {
+    transform: none;
+  }
+}

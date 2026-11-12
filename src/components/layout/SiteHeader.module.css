@@ -1,0 +1,137 @@
+/* Sticky header (design `.hdr`, `.nav`, `.navlink`, `.navhl`). */
+.root {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(246, 240, 230, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line-faint);
+}
+
+.inner {
+  max-width: var(--bar-max);
+  margin: 0 auto;
+  padding: 14px var(--bar-gutter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.logoLink {
+  display: flex;
+  align-items: center;
+  flex: none;
+  text-decoration: none;
+}
+
+.logoLink:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-photo);
+}
+
+.logo {
+  display: block;
+  height: clamp(44px, 3.5cqi, 50px);
+  width: auto;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.navLink {
+  position: relative;
+  color: var(--color-ink);
+  text-decoration: none;
+  font-size: 17px;
+  padding: 10px 0;
+  white-space: nowrap;
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  height: 1.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s var(--ease-out);
+}
+
+.navLink:hover {
+  color: var(--color-ink);
+}
+
+.navLink:hover::after,
+.navLink[aria-current='page']::after,
+.navLink[aria-current='true']::after {
+  transform: scaleX(1);
+}
+
+.navLink:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-photo);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 10px 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-moss-light);
+  color: var(--color-moss);
+  font-weight: 650;
+  text-decoration: none;
+  font-size: 17px;
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-color) var(--ease),
+    color var(--duration-color) var(--ease);
+}
+
+.pill:hover,
+.pill[aria-current='page'] {
+  background: var(--color-moss);
+  color: var(--color-linen);
+}
+
+.pill:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+@container page (max-width: 1180px) {
+  .nav {
+    display: none;
+  }
+}
+
+@container page (max-width: 700px) {
+  .pill,
+  .headerCta {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navLink::after {
+    transition: none;
+  }
+}

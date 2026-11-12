@@ -1,0 +1,37 @@
+/* Breadcrumb trail on sub-pages (design `.crumbs`). */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: var(--text-small);
+  color: var(--color-ink-muted);
+}
+
+.item {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.item + .item::before {
+  content: '/';
+  color: var(--color-ink-muted);
+}
+
+.link {
+  color: var(--color-ink-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link:hover {
+  color: var(--color-ink);
+}
+
+.link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-photo);
+}

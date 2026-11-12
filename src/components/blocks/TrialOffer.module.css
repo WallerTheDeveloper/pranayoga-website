@@ -1,0 +1,50 @@
+/* Rose trial-offer panel with a clay blob in the corner. */
+.panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--color-rose);
+  padding: clamp(40px, 6cqi, 88px) clamp(24px, 5.5cqi, 80px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px 64px;
+}
+
+.blob {
+  position: absolute;
+  width: 520px;
+  right: -140px;
+  top: -160px;
+  z-index: -1;
+  fill: var(--color-clay);
+  opacity: 0.7;
+}
+
+.text {
+  flex: 1 1 400px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.heading {
+  font-size: clamp(38px, 4.4cqi, 64px);
+  line-height: 1.04;
+  font-weight: 380;
+  letter-spacing: -0.02em;
+}
+
+.description {
+  margin: 0;
+  max-width: 460px;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+
+.booking {
+  flex: 0 1 460px;
+  min-width: 0;
+}

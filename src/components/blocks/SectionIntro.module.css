@@ -1,0 +1,33 @@
+/* Eyebrow + heading on the left, optional intro and link on the right. */
+.root {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px 64px;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1 1 520px;
+  min-width: 0;
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 0 1 420px;
+  min-width: 0;
+}
+
+.intro {
+  margin: 0;
+  max-width: 640px;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-ink-muted);
+}

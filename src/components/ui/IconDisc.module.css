@@ -1,0 +1,24 @@
+/* Round moss-light disc behind course icons (design `.disc`). The parent card or item turns it
+   moss on hover by targeting `[data-disc]`. */
+.root {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--color-moss-light);
+  color: var(--color-moss);
+  transition:
+    background-color 0.35s var(--ease),
+    color 0.35s var(--ease);
+}
+
+.large {
+  width: 72px;
+  height: 72px;
+}
+
+.small {
+  width: 48px;
+  height: 48px;
+}

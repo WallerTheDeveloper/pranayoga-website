@@ -1,0 +1,106 @@
+/* Sand footer with grain (design `.foot`, `.flink`). */
+.root {
+  background: var(--color-sand);
+  color: var(--color-ink);
+}
+
+.inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: clamp(56px, 6cqi, 88px) var(--gutter) 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 40px 32px;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logo {
+  display: block;
+  width: 190px;
+  height: auto;
+}
+
+.address {
+  font-style: normal;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 17px;
+}
+
+.heading {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-moss);
+}
+
+.link {
+  color: var(--color-ink);
+  text-decoration: none;
+  padding: 4px 0;
+}
+
+.link:hover {
+  color: var(--color-moss);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-photo);
+}
+
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: var(--text-small);
+  color: var(--color-ink-muted);
+}
+
+.legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.legal .link {
+  color: var(--color-ink-muted);
+}
+
+/* Room for the fixed action bar on phones. */
+@container page (max-width: 700px) {
+  .inner {
+    padding-bottom: 112px;
+  }
+}

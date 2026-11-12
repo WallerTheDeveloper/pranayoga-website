@@ -1,0 +1,55 @@
+/* Home hero (design `.hero-grid`): copy left, photo with an offset rose block right. */
+.inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: clamp(40px, 6cqi, 96px) var(--gutter) clamp(64px, 8cqi, 120px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 64px;
+  align-items: center;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+}
+
+.lead {
+  margin: 0;
+  max-width: 560px;
+  font-size: var(--text-lead);
+  line-height: var(--leading-lead);
+  color: var(--color-ink-muted);
+}
+
+.figure {
+  position: relative;
+  margin: 0 22px 22px 0;
+  justify-self: center;
+  width: calc(100% - 22px);
+  max-width: 480px;
+}
+
+.offset {
+  position: absolute;
+  inset: 22px -22px -22px 22px;
+  border-radius: var(--radius-photo);
+  background: var(--color-rose);
+}
+
+.photo {
+  position: relative;
+  z-index: 1;
+}
+
+@container page (max-width: 960px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+}

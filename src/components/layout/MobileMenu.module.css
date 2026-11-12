@@ -1,0 +1,109 @@
+/* "Menü" button and the full-screen menu (design `.menu-btn`, `.mmenu`, `.mlink`, `.msub`). The
+   menu is a native modal <dialog>: focus trap, Escape and inert background come for free. */
+.button {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1.5px solid var(--line-button);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-photo);
+}
+
+@container page (max-width: 1180px) {
+  .button {
+    display: inline-flex;
+  }
+}
+
+.dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--color-linen);
+  color: var(--color-ink);
+  overflow-y: auto;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+
+/* Keyframes are local to the module (CSS Modules rename them), so this one lives here. */
+@keyframes menu-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dialog[open] {
+  animation: menu-fade-in 0.35s var(--ease-out) both;
+}
+
+.dialog::backdrop {
+  background: transparent;
+}
+
+:global(html:has(dialog[open])) {
+  overflow: hidden;
+}
+
+.content {
+  padding: 14px 20px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--line-button);
+  color: var(--color-ink);
+  background: var(--color-linen);
+  cursor: pointer;
+  font: inherit;
+}
+
+.close:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open] {
+    animation: none;
+  }
+}

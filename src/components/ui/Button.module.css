@@ -1,0 +1,81 @@
+/* Ink, outline and light pills (design `.btn-dark`, `.btn-line`, `.btn-light`). */
+.root {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 26px;
+  border-radius: var(--radius-pill);
+  border: 0;
+  font: inherit;
+  font-weight: 650;
+  font-size: var(--text-button);
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-color) var(--ease),
+    transform var(--duration-color) var(--ease);
+}
+
+.root:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.dark {
+  background: var(--color-ink);
+  color: var(--color-linen);
+}
+
+.dark:hover {
+  background: var(--color-moss);
+  color: var(--color-linen);
+}
+
+.dark:active {
+  transform: scale(0.98);
+}
+
+.outline {
+  padding: 0 24px;
+  border: 1.5px solid var(--color-ink);
+  background: transparent;
+  color: var(--color-ink);
+}
+
+.outline:hover {
+  background: rgba(42, 33, 27, 0.07);
+  color: var(--color-ink);
+}
+
+.light {
+  background: var(--color-linen);
+  color: var(--color-ink);
+}
+
+.light:hover {
+  background: var(--color-white);
+  color: var(--color-ink);
+}
+
+.light:focus-visible {
+  outline-color: var(--color-linen);
+}
+
+.arrow {
+  flex: none;
+  transition: transform 0.35s var(--ease-out);
+}
+
+.root:hover .arrow {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dark:active,
+  .root:hover .arrow {
+    transform: none;
+  }
+}

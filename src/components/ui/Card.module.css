@@ -1,0 +1,47 @@
+/* Linen card that lifts on hover (design `.card`). */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--color-linen);
+  color: var(--color-ink);
+  text-decoration: none;
+  transition:
+    transform var(--duration-lift) var(--ease-out),
+    box-shadow var(--duration-lift) var(--ease-out);
+}
+
+.root:hover {
+  color: var(--color-ink);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card);
+}
+
+.root:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-photo);
+}
+
+.root:hover [data-disc] {
+  background: var(--color-moss);
+  color: var(--color-linen);
+}
+
+.root :global(.card-arrow) {
+  transition: transform 0.35s var(--ease-out);
+}
+
+.root:hover :global(.card-arrow) {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root:hover,
+  .root:hover :global(.card-arrow) {
+    transform: none;
+  }
+}

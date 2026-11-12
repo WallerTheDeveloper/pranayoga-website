@@ -1,0 +1,17 @@
+/* Small pill label (design `.tag`, `.tag-dark`). */
+.root {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-moss-light);
+  color: var(--color-moss);
+  font-size: var(--text-label);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.dark {
+  background: var(--color-ink);
+  color: var(--color-linen);
+}

@@ -1,0 +1,39 @@
+/* Course card on the home grid and the courses page. */
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.teaser {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: var(--color-ink-muted);
+}
+
+.more {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--text-meta);
+  font-weight: 650;
+  color: var(--color-moss);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+  gap: 24px;
+}

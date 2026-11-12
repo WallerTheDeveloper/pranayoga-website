@@ -1,0 +1,62 @@
+/* Moss band with the big italic "Prana" inside a breathing ring. */
+.band {
+  background: var(--color-moss);
+  color: var(--color-linen);
+  overflow: hidden;
+}
+
+.inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: clamp(72px, 9cqi, 136px) var(--gutter);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 40px 80px;
+}
+
+.wordWrap {
+  position: relative;
+  flex: 1 1 420px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(220px, 26cqi, 360px);
+}
+
+.ring {
+  position: absolute;
+  width: clamp(220px, 26cqi, 360px);
+  aspect-ratio: 1;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(220, 231, 220, 0.55);
+  box-shadow:
+    0 0 0 28px rgba(220, 231, 220, 0.06),
+    0 0 0 56px rgba(220, 231, 220, 0.04);
+}
+
+.word {
+  position: relative;
+  margin: 0;
+  font-size: clamp(88px, 12cqi, 184px);
+  line-height: 1;
+  font-style: italic;
+  font-weight: 340;
+  letter-spacing: -0.03em;
+}
+
+.text {
+  flex: 1 1 420px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.statement {
+  margin: 0;
+  font-size: clamp(26px, 2.6cqi, 36px);
+  line-height: 1.25;
+  font-weight: 380;
+}

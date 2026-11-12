@@ -1,0 +1,138 @@
+/* "Kurse" dropdown (design `.navdd`, `.ddpanel`, `.dditem`). Closing waits 0.2 s, so the panel
+   doesn't vanish when the pointer briefly leaves it. */
+.root {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chevron {
+  transition: transform 0.35s var(--ease-out);
+}
+
+.panel {
+  position: absolute;
+  top: 100%;
+  left: -28px;
+  z-index: 35;
+  padding-top: 14px;
+  width: 680px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition:
+    opacity 0.25s var(--ease) 0.2s,
+    transform 0.35s var(--ease-out) 0.2s,
+    visibility 0s linear 0.45s;
+}
+
+.open .panel {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.25s var(--ease),
+    transform 0.4s var(--ease-out),
+    visibility 0s;
+}
+
+.open .chevron {
+  transform: rotate(180deg);
+}
+
+/* Before hydration (or without JS) plain CSS opens the panel. */
+.root:not([data-enhanced]):hover .panel,
+.root:not([data-enhanced]):focus-within .panel {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.box {
+  padding: 14px;
+  border-radius: var(--radius-card);
+  background: var(--color-linen);
+  box-shadow: var(--shadow-panel);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 8px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--color-ink);
+  text-decoration: none;
+  transition: background-color var(--duration-color) var(--ease);
+}
+
+.item:hover,
+.item[aria-current='page'] {
+  background: var(--color-sand);
+  color: var(--color-ink);
+}
+
+.item:hover [data-disc] {
+  background: var(--color-moss);
+  color: var(--color-linen);
+}
+
+.item:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.itemText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.itemTitle {
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.itemTagline {
+  font-size: var(--text-small);
+  line-height: 1.35;
+  color: var(--color-ink-muted);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 16px 12px 4px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.hint {
+  font-size: var(--text-small);
+  color: var(--color-ink-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .open .panel {
+    transform: none;
+  }
+}

@@ -1,0 +1,79 @@
+/* Links inside the full-screen menu (design `.mlink`, `.msub`). */
+.nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.link {
+  display: block;
+  padding: 10px 0;
+  color: var(--color-ink);
+  text-decoration: none;
+  font-family: var(--font-serif);
+  font-variation-settings: var(--serif-variation);
+  font-size: 30px;
+  line-height: 1.25;
+  border-bottom: 1px solid rgba(42, 33, 27, 0.1);
+}
+
+.link[aria-current='page'] {
+  color: var(--color-moss);
+  font-style: italic;
+}
+
+.link:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-photo);
+}
+
+.linkNoRule {
+  border-bottom: 0;
+}
+
+.withIcon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  display: flex;
+  color: var(--color-moss);
+}
+
+.sub {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0 14px 16px;
+  border-bottom: 1px solid rgba(42, 33, 27, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.subLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  color: var(--color-ink);
+  text-decoration: none;
+  font-size: 19px;
+}
+
+.subLink[aria-current='page'] {
+  color: var(--color-moss);
+  font-weight: 650;
+}
+
+.subLink:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-photo);
+}
+
+.socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

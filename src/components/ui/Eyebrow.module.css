@@ -1,0 +1,14 @@
+/* Caps label above headings (design `.lbl-eyebrow`). */
+.root {
+  margin: 0;
+  font-size: var(--text-label);
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-moss);
+}
+
+/* On the moss band. */
+.onDark {
+  color: var(--color-moss-light);
+}

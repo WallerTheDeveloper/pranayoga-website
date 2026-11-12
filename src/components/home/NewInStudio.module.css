@@ -1,0 +1,66 @@
+/* Two wide cards for the new courses (design `.two`). */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.card {
+  padding: 0;
+  overflow: hidden;
+  background: var(--color-sand);
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 0;
+}
+
+.photo {
+  border-radius: 0;
+  height: 100%;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(20px, 2.4cqi, 32px);
+}
+
+.tag {
+  align-self: flex-start;
+}
+
+.text {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: var(--color-ink-muted);
+}
+
+.link {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-meta);
+  font-weight: 650;
+  color: var(--color-moss);
+}
+
+@container page (max-width: 760px) {
+  .two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

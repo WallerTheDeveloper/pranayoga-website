@@ -1,0 +1,34 @@
+/* Full-width band with the centred 1280 px content column. */
+.band {
+  position: relative;
+}
+
+.sand {
+  background: var(--color-sand);
+}
+
+.moss {
+  background: var(--color-moss);
+  color: var(--color-linen);
+  overflow: hidden;
+}
+
+.inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--section-space) var(--gutter);
+}
+
+.flushTop {
+  padding-top: 0;
+}
+
+.flushBottom {
+  padding-bottom: 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}

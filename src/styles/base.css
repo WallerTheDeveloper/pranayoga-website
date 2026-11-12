@@ -1,0 +1,146 @@
+/* Global base styles. Component styles live in CSS Modules next to each component. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  /* Focused elements and anchor targets stay clear of the sticky header and the fixed phone
+     bar (WCAG 2.4.11). The bottom value applies at every width, so it never lags the bar's
+     container breakpoint. */
+  scroll-padding-top: var(--header-clearance);
+  scroll-padding-bottom: calc(var(--action-bar-clearance) + env(safe-area-inset-bottom));
+}
+
+body {
+  margin: 0;
+  background: var(--color-sand);
+  color: var(--color-ink);
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: var(--color-moss);
+}
+
+a:hover {
+  color: var(--color-ink);
+}
+
+h1,
+h2,
+h3,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+/* The page container: every container query in the modules targets `page`. */
+.page {
+  container: page / inline-size;
+  min-width: 0;
+  overflow-x: clip;
+  background: var(--color-linen);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+}
+
+.serif {
+  font-family: var(--font-serif);
+  font-variation-settings: var(--serif-variation);
+  font-optical-sizing: auto;
+}
+
+/* Paper grain overlay for sand sections, bands and the footer. */
+.paper {
+  position: relative;
+  isolation: isolate;
+}
+
+.paper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/brand/grain.png');
+  background-size: 256px;
+  mix-blend-mode: overlay;
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Generic visible focus for anything without its own focus style. */
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -100px;
+  z-index: 100;
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: var(--color-linen);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 12px;
+  color: var(--color-linen);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Scroll reveals, the hero entrance and the Prana breath ring arrive in phase 3 (docs/PLAN.md). */
+
+/* Reduced motion: no movement, only short colour changes (Main.dc.html §06). */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-property: background-color, color, border-color !important;
+    transition-duration: 0.16s !important;
+  }
+}
