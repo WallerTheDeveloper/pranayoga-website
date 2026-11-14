@@ -8,18 +8,18 @@ interface PranaBandProps {
   text: string
 }
 
-/** The breathing ring animates in phase 3 (motion pass); here it stands still. */
+/** Moss band with "Prana" inside the breathing ring (8 s cycle; still under reduced motion). */
 export function PranaBand({ word, eyebrow, text }: PranaBandProps) {
   return (
     <section className={styles.band}>
       <div className={styles.inner}>
         <div className={styles.wordWrap}>
-          <div className={styles.ring} aria-hidden="true" />
+          <div className={`breath ${styles.ring}`} aria-hidden="true" />
           <p className={`serif ${styles.word}`} lang="sa">
             {word}
           </p>
         </div>
-        <div className={styles.text}>
+        <div className={`rv ${styles.text}`}>
           <Eyebrow onDark>{eyebrow}</Eyebrow>
           <p className={`serif ${styles.statement}`}>{text}</p>
         </div>

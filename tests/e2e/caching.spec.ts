@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext } from '@playwright/test'
 
-import { E2E_ADMIN } from './constants'
+import { login } from './admin-api'
 
 /**
  * Publishing in the admin shows on the next page load; draft saves don't; repeat loads come from
@@ -10,13 +10,6 @@ import { E2E_ADMIN } from './constants'
 interface ReviewDoc {
   id: number
   text: string
-}
-
-async function login(request: APIRequestContext): Promise<Record<string, string>> {
-  const response = await request.post('/api/users/login', { data: E2E_ADMIN })
-  expect(response.ok()).toBe(true)
-  const { token } = (await response.json()) as { token: string }
-  return { Authorization: `JWT ${token}` }
 }
 
 async function findReview(

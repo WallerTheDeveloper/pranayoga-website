@@ -4,21 +4,22 @@ import type { Media } from '@/payload-types'
 import type { ImageData } from '../types'
 import { cleanText } from './values'
 
-/** Payload serves uploads under this path; next.config allows it for next/image. */
+/** Payload serves uploads under these paths; next.config allows the media one for next/image. */
 export const MEDIA_FILE_PATH = '/api/media/file/'
+export const DOWNLOAD_FILE_PATH = '/api/downloads/file/'
 
 /** Placeholder origin for parsing relative paths; never requested. */
 const RELATIVE_BASE = 'http://relative.invalid'
 
 /**
- * Reduces an upload URL to a same-site path. Payload makes URLs absolute when `serverURL` is set;
- * next/image only accepts the local path. Anything outside the media route is rejected.
+ * Reduces an upload URL to a same-site path below `basePath`. Payload makes URLs absolute when
+ * `serverURL` is set; next/image only accepts the local path. Anything else is rejected.
  *
  * Inside Next, `withPayload` turns on Payload's trailing-slash mode, so file URLs come back as
  * `/api/media/file/x.jpg/`. Next answers that with a 308 to `x.jpg`, which the image optimizer
  * does not follow, so the slash after the file name is removed here.
  */
-export function localMediaPath(url: string | null | undefined): string | null {
+export function localUploadPath(url: string | null | undefined, basePath: string): string | null {
   if (!url) return null
   let parsed: URL
   try {
@@ -29,8 +30,12 @@ export function localMediaPath(url: string | null | undefined): string | null {
   }
   if (!url.startsWith('/') && parsed.origin === RELATIVE_BASE) return null
   const file = parsed.pathname.replace(/\/+$/, '')
-  if (!file.startsWith(MEDIA_FILE_PATH) || file.length === MEDIA_FILE_PATH.length) return null
+  if (!file.startsWith(basePath) || file.length === basePath.length) return null
   return `${file}${parsed.search}`
+}
+
+export function localMediaPath(url: string | null | undefined): string | null {
+  return localUploadPath(url, MEDIA_FILE_PATH)
 }
 
 /** Adds `?v=<updatedAt>` so a replaced file is never served from a stale cache. */
@@ -72,4 +77,11 @@ export function toImage(value: unknown, tier: ImageTier): ImageData | null {
     height: source.height,
     objectPosition: focalPosition(value),
   }
+}
+
+/** The original upload (not a tier size), e.g. for "open in full size" links. */
+export function originalImageHref(value: unknown): string | null {
+  if (!isMediaDoc(value)) return null
+  const path = localMediaPath(value.url)
+  return path ? withVersion(path, value.updatedAt) : null
 }

@@ -4,12 +4,16 @@ import type { ReactNode } from 'react'
 
 import '@/styles/tokens.css'
 import '@/styles/base.css'
+import '@/styles/motion.css'
 
 import { ContactBar } from '@/components/layout/ContactBar'
 import { LivePreviewListener } from '@/components/layout/LivePreviewListener'
 import { MobileActionBar } from '@/components/layout/MobileActionBar'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { SiteHeader } from '@/components/layout/SiteHeader'
+import { IntroLoader } from '@/components/motion/IntroLoader'
+import { PageTransition } from '@/components/motion/PageTransition'
+import { ScrollReveal } from '@/components/motion/ScrollReveal'
 import { getBusinessSettings, getCourses, getTechnicalSettings } from '@/content'
 import { sharedCopy } from '@/content/copy/shared'
 import { getServerEnv } from '@/lib/env'
@@ -46,15 +50,22 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SiteLayout({ children }: { children: ReactNode }) {
-  const [settings, courses, draft] = await Promise.all([
+  const [settings, technical, courses, draft] = await Promise.all([
     getBusinessSettings(),
+    getTechnicalSettings(),
     getCourses(),
     draftMode(),
   ])
   const year = new Date().getFullYear()
   return (
-    <html lang="de" className={`${fraunces.variable} ${atkinson.variable}`}>
+    // The intro script and ScrollReveal add classes to <html> before React hydrates it.
+    <html
+      lang="de"
+      className={`${fraunces.variable} ${atkinson.variable}`}
+      suppressHydrationWarning
+    >
       <body>
+        {technical.featureFlags.introLoader ? <IntroLoader word={sharedCopy.introWord} /> : null}
         <a className="skip-link" href={`#${MAIN_CONTENT_ID}`}>
           {sharedCopy.skipLink}
         </a>
@@ -62,7 +73,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
           <ContactBar settings={settings} />
           <SiteHeader settings={settings} courses={courses} />
           <main id={MAIN_CONTENT_ID} tabIndex={-1}>
-            {children}
+            <PageTransition>{children}</PageTransition>
           </main>
           <SiteFooter settings={settings} courses={courses} year={year} />
           <MobileActionBar
@@ -71,6 +82,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
             contact={settings.contact}
           />
         </div>
+        <ScrollReveal />
         {draft.isEnabled ? (
           <LivePreviewListener serverURL={getServerEnv().NEXT_PUBLIC_SERVER_URL} />
         ) : null}

@@ -68,3 +68,34 @@ export function isSafeRedirectTarget(value: string): boolean {
   const url = parseUrl(target)
   return url?.protocol === 'https:'
 }
+
+/** The stored source a same-site target would be looked up as; null for other sites. */
+export function sameSiteRedirectPath(target: string): string | null {
+  const trimmed = target.trim()
+  return trimmed.startsWith('/') ? normalizeRedirectSource(trimmed) : null
+}
+
+/** Longer chains than this are not followed; real redirect lists have one hop. */
+const MAX_REDIRECT_HOPS = 20
+
+/**
+ * True when `from → target`, followed through the other stored redirects (source → target),
+ * leads back to `from`: the browser would bounce between the addresses forever.
+ */
+export function redirectLoops(
+  from: string,
+  target: string,
+  others: ReadonlyMap<string, string>,
+): boolean {
+  const start = normalizeRedirectSource(from)
+  if (!start) return false
+  const seen = new Set<string>()
+  let next = sameSiteRedirectPath(target)
+  while (next !== null && !seen.has(next) && seen.size < MAX_REDIRECT_HOPS) {
+    if (next === start) return true
+    seen.add(next)
+    const stored = others.get(next)
+    next = stored === undefined ? null : sameSiteRedirectPath(stored)
+  }
+  return false
+}

@@ -9,6 +9,8 @@ export const sharedCopy = {
     footerLogoAlt: 'Prana Yoga Studio Essen',
   },
   skipLink: 'Zum Inhalt springen',
+  /** The first-visit loader's word (Sanskrit). */
+  introWord: 'Prana',
   whatsApp: {
     bookLabel: 'Termin über WhatsApp',
     /** Spoken by screen readers: the link leaves the site. */

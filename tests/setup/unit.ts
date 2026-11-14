@@ -29,6 +29,9 @@ vi.mock('next/image', () => ({
     }),
 }))
 
+// jsdom does no layout: scrolling is a no-op the components may call.
+Element.prototype.scrollIntoView ??= function scrollIntoView() {}
+
 afterEach(() => {
   cleanup()
 })

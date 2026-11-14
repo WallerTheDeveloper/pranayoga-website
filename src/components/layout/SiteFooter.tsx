@@ -6,6 +6,7 @@ import type { BusinessSettingsView, CourseSummary } from '@/content/types'
 import { routes } from '@/lib/routes'
 
 import { Logo } from './Logo'
+import { FOOTER_NAV_ID } from './anchors'
 import styles from './SiteFooter.module.css'
 
 interface SiteFooterProps {
@@ -21,7 +22,7 @@ export function SiteFooter({ settings, courses, year }: SiteFooterProps) {
   return (
     <footer className={`${styles.root} paper`}>
       <div className={styles.inner}>
-        <div className={styles.columns}>
+        <div className={styles.columns} id={FOOTER_NAV_ID}>
           <div className={styles.brand}>
             <Logo variant="stacked" alt={sharedCopy.brand.footerLogoAlt} className={styles.logo} />
             {contact.street || contact.cityLine ? (

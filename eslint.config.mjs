@@ -24,6 +24,12 @@ const eslintConfig = [
     rules: { 'no-console': 'off' },
   },
   {
+    // Component tests pass plain anchors as fixtures. The catch-all route (unknown URLs → 404 or
+    // an old-URL redirect) makes this rule treat every literal path as a page link.
+    files: ['tests/**'],
+    rules: { '@next/next/no-html-link-for-pages': 'off' },
+  },
+  {
     ignores: [
       '.next/',
       'coverage/',

@@ -14,6 +14,10 @@ const manifestSchema = z.object({
         file: z.string().regex(FILE_NAME, 'must be a lowercase kebab-case .jpg/.png/.webp name'),
         alt: z.string().trim().min(1).max(200),
         pages: z.array(z.string().min(1)).min(1),
+        /** Focal point in percent, for crops the design sets (object-position). */
+        focal: z
+          .object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100) })
+          .optional(),
       }),
     )
     .min(1),

@@ -1,0 +1,106 @@
+/* Kontakt: details 5 parts, form 7 parts (design `.split`). */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 72px;
+  align-items: start;
+}
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-width: 0;
+}
+
+.whatsApp {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hint {
+  margin: 0;
+  max-width: 470px;
+  font-size: var(--text-meta);
+  line-height: 1.5;
+}
+
+.details {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* The disc sits left of both lines; it lives in the dt, so it is placed against the row. */
+.detail {
+  position: relative;
+  min-height: 52px;
+  padding-left: 68px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.disc {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: -26px;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-pill);
+  background: var(--color-moss-light);
+  color: var(--color-moss);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.term {
+  font-size: var(--text-small);
+  color: var(--color-ink-muted);
+}
+
+.value {
+  margin: 0;
+  font-size: 19px;
+  overflow-wrap: anywhere;
+}
+
+.link {
+  color: var(--color-ink);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+}
+
+.link:hover {
+  color: var(--color-moss);
+}
+
+.address {
+  font-style: normal;
+}
+
+.socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* "Anfahrt" */
+.directions {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+@container page (max-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+}

@@ -22,6 +22,7 @@ export async function closePayload(payload: Payload): Promise<void> {
 /** Collections the suites write to, children before what they reference. */
 const WIPE_ORDER: readonly CollectionSlug[] = [
   'redirects',
+  'downloads',
   'courses',
   'price-groups',
   'reviews',
@@ -33,24 +34,31 @@ const VERSIONED: readonly CollectionSlug[] = ['courses', 'price-groups', 'review
 
 /**
  * Empties the test collections without running hooks (the media delete guard and the last-user
- * guard would refuse), and the test upload folder, so uploads keep their names on the next run.
+ * guard would refuse), and the test upload folders, so uploads keep their names on the next run.
  * Both guards run before anything is deleted.
  */
 export async function wipeCollections(payload: Payload): Promise<void> {
   assertTestDatabase()
-  const staticDir = payload.collections.media.config.upload.staticDir
-  if (!isTestUploadFolder(staticDir)) {
-    throw new Error(
-      `Refusing to empty "${staticDir}": set MEDIA_DIR=uploads/test-media in .env.test.`,
-    )
-  }
+  const uploadDirs = [
+    { dir: payload.collections.media.config.upload.staticDir, env: 'MEDIA_DIR=uploads/test-media' },
+    {
+      dir: payload.collections.downloads.config.upload.staticDir,
+      env: 'DOWNLOADS_DIR=uploads/test-downloads',
+    },
+  ]
+  const testDirs = uploadDirs.map(({ dir, env }) => {
+    if (!isTestUploadFolder(dir)) {
+      throw new Error(`Refusing to empty "${dir}": set ${env} in .env.test.`)
+    }
+    return dir
+  })
   for (const collection of WIPE_ORDER) {
     await payload.db.deleteMany({ collection, where: { id: { exists: true } } })
   }
   for (const collection of VERSIONED) {
     await payload.db.deleteVersions({ collection, where: { id: { exists: true } } })
   }
-  rmSync(staticDir, { recursive: true, force: true })
+  for (const dir of testDirs) rmSync(dir, { recursive: true, force: true })
 }
 
 export const ADMIN_EMAIL = 'int-admin@example.test'

@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { routeTable } from '../../src/lib/routes'
+import { ALL_PAGES } from './pages'
 
 /** Public German URLs, English route folders 301 to them, and links only ever use German URLs. */
 
@@ -27,7 +28,7 @@ for (const path of INTERNAL_ONLY) {
   })
 }
 
-for (const pagePath of ['/', '/kurse/', '/kurse/hatha-yoga/']) {
+for (const pagePath of ALL_PAGES.map((sitePage) => sitePage.path)) {
   test(`every internal link on ${pagePath} uses a German URL`, async ({ page }) => {
     await page.goto(pagePath)
     const hrefs = await page

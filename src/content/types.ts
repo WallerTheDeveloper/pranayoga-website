@@ -128,7 +128,78 @@ export interface TeacherTrainingFact {
   label: string
 }
 
-/** The teacher training: what the shared teaser shows (phase 3 adds the page's own data). */
+export interface TeacherTrainingTopic {
+  title: string
+  text: string | null
+}
+
+/**
+ * The teacher-training page's admin data. Every value is null (or empty) until the studio fills
+ * it in, and the page leaves out what is missing.
+ */
+export interface TeacherTrainingPageView {
+  startMonthLabel: string | null
+  endMonthLabel: string | null
+  priceLabel: string | null
+  depositLabel: string | null
+  /** "14 Tage": reads after "fällig" and "spätestens". */
+  depositDeadline: string | null
+  balanceDeadline: string | null
+  membershipDiscount: string | null
+  /** One label per weekend, in admin order: "14.–15. März 2027". */
+  weekends: string[]
+  /** "14. März 2027": the first day of the first weekend. */
+  firstDayLabel: string | null
+  topics: TeacherTrainingTopic[]
+  requirements: string[]
+  certification: string | null
+  flyer: {
+    image: ImageData | null
+    /** The full-size flyer image, for "Flyer öffnen" when there is no PDF. */
+    imageHref: string | null
+  }
+}
+
+export interface DownloadView {
+  title: string
+  /** Same-site path with a `?v=` version. */
+  href: string
+}
+
+/** Rich text as Payload stores it (Lexical JSON). Rendered by the RichText component. */
+export interface RichTextData {
+  root: {
+    type: string
+    children: { type: string; version: number; [key: string]: unknown }[]
+    direction: ('ltr' | 'rtl') | null
+    format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+    indent: number
+    version: number
+  }
+  [key: string]: unknown
+}
+
+export interface LegalPageView {
+  /** "12. November 2026"; null when the admin left "Stand" empty. */
+  updatedOnLabel: string | null
+  /** Null while the text is empty. */
+  content: RichTextData | null
+}
+
+export interface SignupPlan {
+  /** The price block id: the form's option value. */
+  id: string
+  /** "1× pro Woche – 59 € pro Monat". */
+  label: string
+}
+
+export interface SignupPlanGroup {
+  /** The group's kicker, "Mitgliedschaft": the option group label. */
+  label: string
+  plans: SignupPlan[]
+}
+
+/** The teacher training: what the shared teaser shows. */
 export interface TeacherTrainingView {
   /** "März 2027"; null when no start month is set. */
   startMonthLabel: string | null

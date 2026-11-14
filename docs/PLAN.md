@@ -295,7 +295,64 @@ This is a guardrail against mistakes, not a security sandbox.
 - Tests for each piece (E2E: every course renders, FAQ toggles, schedule hidden when empty).
 - **From the Phase 1 review:** `getCourse` caches `null` for any well-formed unknown slug under `course:<slug>`, with no expiry. Before the course route goes live, check the slug against `getCourses()` first, so random URLs can't grow the cache.
 
-## Phase 3: remaining pages, forms, motion → review
+## Phase 3: remaining pages, forms, motion → review ✅ built, awaiting review
+
+**Status:** built on 2026-11-13; waiting at the review gate. Nothing is committed (git writes stay off).
+- **Pages:** Über uns, Yogaausbildungen, Mitgliedschaft & Preise, Anmeldeformular, Kontakt, Impressum, Datenschutz and the 404 page are all static, re-rendered daily and cleared on publish. `error.tsx` and `global-error.tsx` use the 404 layout with a reload link.
+- **New content types:**
+  - `downloads` collection: PDF only. A tag says where a file is used (e.g. the contract on the pricing page), and each tag may be used once.
+  - `legal-notice` and `privacy-policy` globals: Lexical, with drafts and an "updated on" date.
+  - `teacher-training` gains weekends, topics, requirements, certification and a flyer.
+  - The schema is pushed to the dev DB. The new seed data is not, because `pnpm seed` resets admin edits.
+- **Decisions made while building:**
+  - **Forms send nothing (as decided).** The signup and contact forms validate on submit and show an `ErrorSummary` that takes focus. The signup form also checks the IBAN checksum. Without JavaScript the send button stays disabled with a `noscript` note.
+  - **No plan, no form.** If no price block is marked for the signup form, the page shows a note and the WhatsApp group instead of a form nobody could send.
+  - **Bank fields.** Choosing "Überweisung" hides the bank fields, and their errors leave the summary.
+  - **Legal placeholders.** A block that still contains a `[placeholder]` is hidden, and the page says the text is being prepared. The seed fills both pages with placeholders, so both show that note today.
+  - **Redirects:**
+    - Old addresses answer 308, because Next's `permanentRedirect` uses 308. Search engines treat it like a 301.
+    - The admin refuses a redirect to its own address and one that would close a loop (A → B → A).
+    - A stored self-redirect is ignored at read time and answers 404.
+    - Publishing a redirect clears the cached 404 of that address.
+  - **Known Next quirk.** On the first render of an old course address (the cache miss), Next sends the `Location` header twice with the same value. Cached hits send it once. Browsers accept identical copies; the E2E test checks every copy.
+  - **404 title.** The 404 routes throw `notFound()` from `generateMetadata` too. Otherwise the client swapped "Seite nicht gefunden" for the default title after hydration.
+  - **Sitemap and robots.** The sitemap is empty while `noindex` is on. robots.txt then blocks everything; with it off, it allows `/`, blocks `/admin/`, `/api/` and `/next/`, and names the sitemap.
+  - **Intro loader.** It is built but off: `featureFlags.introLoader` is seeded false. The E2E test switches it on, checks that it runs once per session, and switches it off again.
+  - **Motion.** All motion is off under `prefers-reduced-motion`. E2E runs with reduced motion, except the motion spec.
+  - **Certificate buttons.** Their accessible name starts with the visible "Vergrößern" (axe `label-content-name-mismatch`).
+- **Fixed on the way:**
+  - Phase 3's stylesheets changed the CSS Module load order, so the header CTA stopped hiding at ≤700 px and covered the menu button. It is now scoped to `.actions` (higher specificity).
+  - The Kontakt details list put icons straight into `dl`, which is invalid. The icon now sits inside the `dt`.
+- **Tests:**
+  - 437 unit and integration tests (coverage 97.5% statements, 91.7% branches).
+  - 163 E2E tests, all passing. They cover:
+    - every new page answering 200 with its heading and canonical, and no visible placeholders
+    - forms: all errors at once, summary links, IBAN checksum, the transfer switch, success focus, and the no-JS state
+    - the lightbox: wrap-around, focus trap, Escape returns focus
+    - the map: no Google request before "Karte laden"
+    - 404s, old-URL redirects, and a redirect replacing a cached 404
+    - sitemap and robots with `noindex` on and off
+    - motion, including reduced motion and the intro flag
+    - the no-JS mobile menu
+    - axe on every page, with errors shown and the lightbox open
+    - screenshots at 1440 and 390
+- **Review:** one code-reviewer pass found 0 CRITICAL and 0 HIGH issues.
+  - Fixed:
+    - the summary keeps hidden bank fields
+    - the signup form has no plans to offer
+    - redirect loops
+    - `safeHref` accepted backslash and control characters in paths
+    - the IBAN copy button did not reset after a failed copy
+    - the sitemap was filled under `noindex`
+    - a dead class on legal sections
+  - Left as is: the intro loader stays behind its flag. One low note was justified as built.
+- **Open client items (before launch):**
+  - Google Maps embed URL (Kontakt shows only the route link until it is set)
+  - Impressum and Datenschutz texts
+  - teacher-training dates, prices, texts and certification, plus the flyer PDF
+  - the contract PDF (the pricing page hides the download until one is uploaded)
+  - the WhatsApp group invite link
+  - sending the forms by email (needs the email adapter)
 
 **Decided before the start (2026-11-12):**
 - **Forms stay UI only in Phase 3.** Anmeldeformular and Kontakt validate and show a success state but send nothing. Sending (email through a Payload email adapter, which "forgot password" needs too) is a before-launch item.

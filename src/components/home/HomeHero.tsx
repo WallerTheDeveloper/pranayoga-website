@@ -22,12 +22,18 @@ export function HomeHero({ eyebrow, heading, lead, image, groupUrl, contact }: H
       <div className={styles.inner}>
         <div className={styles.grid}>
           <div className={styles.copy}>
-            <Eyebrow>{eyebrow}</Eyebrow>
-            <Heading as="h1" size="display" accent={heading.accent} accentTone="moss">
+            <Eyebrow className="in1">{eyebrow}</Eyebrow>
+            <Heading
+              as="h1"
+              size="display"
+              accent={heading.accent}
+              accentTone="moss"
+              className="in2"
+            >
               {heading.text}
             </Heading>
-            <p className={styles.lead}>{lead}</p>
-            <WhatsAppBand groupUrl={groupUrl} contact={contact} />
+            <p className={`in3 ${styles.lead}`}>{lead}</p>
+            <WhatsAppBand groupUrl={groupUrl} contact={contact} className="in4" />
           </div>
           <figure className={styles.figure}>
             <div className={styles.offset} aria-hidden="true" />
@@ -35,7 +41,7 @@ export function HomeHero({ eyebrow, heading, lead, image, groupUrl, contact }: H
               image={image}
               sizes="(max-width: 960px) min(480px, 100vw), 480px"
               aspectRatio="3 / 4"
-              className={styles.photo}
+              className={`in-img ${styles.photo}`}
               preload
             />
           </figure>

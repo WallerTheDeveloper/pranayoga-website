@@ -1,0 +1,83 @@
+/* 404 and error pages (Fehler-404.dc.html): text left, the breathing ring right. */
+.inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: clamp(48px, 6cqi, 96px) var(--gutter) var(--section-space);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 64px;
+  align-items: center;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.lead {
+  margin: 0;
+  max-width: 600px;
+  font-size: var(--text-lead);
+  line-height: var(--leading-lead);
+  color: var(--color-ink-muted);
+}
+
+.ways {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.markWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(220px, 26cqi, 360px);
+  color: var(--color-moss);
+}
+
+.ring {
+  position: absolute;
+  width: clamp(220px, 26cqi, 360px);
+  aspect-ratio: 1;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(46, 91, 62, 0.45);
+  box-shadow:
+    0 0 0 28px rgba(46, 91, 62, 0.05),
+    0 0 0 56px rgba(46, 91, 62, 0.03);
+}
+
+.mark {
+  position: relative;
+  margin: 0;
+  font-size: clamp(72px, 10cqi, 150px);
+  line-height: 1;
+  font-style: italic;
+  font-weight: 340;
+  letter-spacing: -0.03em;
+}
+
+.reload {
+  align-self: flex-start;
+}
+
+@container page (max-width: 960px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+
+  .markWrap {
+    min-height: 200px;
+  }
+
+  .ring {
+    width: 200px;
+  }
+}

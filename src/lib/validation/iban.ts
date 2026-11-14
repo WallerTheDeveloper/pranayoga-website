@@ -27,17 +27,27 @@ function mod97(digits: string): number {
   return remainder
 }
 
-export function isValidIban(value: string): boolean {
+export type IbanProblem = 'format' | 'checksum'
+
+/**
+ * What is wrong with an IBAN, if anything: 'format' for the wrong shape or length (a digit
+ * missing), 'checksum' for a complete-looking IBAN with a typo. Null when it is valid.
+ */
+export function ibanProblem(value: string): IbanProblem | null {
   const iban = normalizeIban(value)
-  if (!IBAN_SHAPE.test(iban)) return false
+  if (!IBAN_SHAPE.test(iban)) return 'format'
 
   const country = iban.slice(0, 2)
   const expectedLength = IBAN_LENGTHS[country]
-  if (expectedLength !== undefined && iban.length !== expectedLength) return false
+  if (expectedLength !== undefined && iban.length !== expectedLength) return 'format'
 
   const rearranged = `${iban.slice(4)}${iban.slice(0, 4)}`
   const digits = rearranged.replace(/[A-Z]/g, (letter) => String(letter.charCodeAt(0) - 55))
-  return mod97(digits) === 1
+  return mod97(digits) === 1 ? null : 'checksum'
+}
+
+export function isValidIban(value: string): boolean {
+  return ibanProblem(value) === null
 }
 
 /** Groups of four, as printed on bank documents. */

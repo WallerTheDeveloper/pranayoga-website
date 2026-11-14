@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 
 import { seedCourses } from '../../seed/data/courses'
+import { INFO_PAGES } from './pages'
 
 /** axe-core on every built page: no serious or critical WCAG 2.2 AA violations. */
 
@@ -71,5 +72,49 @@ for (const course of seedCourses) {
 
 test('course page, phone @mobile', async ({ page }) => {
   await page.goto('/kurse/hatha-yoga/')
+  expect(await seriousViolations(page)).toEqual([])
+})
+
+for (const sitePage of INFO_PAGES) {
+  test(`${sitePage.path}, desktop`, async ({ page }) => {
+    await page.goto(sitePage.path)
+    expect(await seriousViolations(page)).toEqual([])
+  })
+
+  test(`${sitePage.path}, phone @mobile`, async ({ page }) => {
+    await page.goto(sitePage.path)
+    expect(await seriousViolations(page)).toEqual([])
+  })
+}
+
+test('404 page, desktop', async ({ page }) => {
+  await page.goto('/gibt-es-nicht/')
+  expect(await seriousViolations(page)).toEqual([])
+})
+
+for (const { path, submit } of [
+  { path: '/anmeldeformular/', submit: 'Anmeldung senden' },
+  { path: '/kontakt/', submit: 'Nachricht senden' },
+]) {
+  test(`${path} showing its errors`, async ({ page }) => {
+    await page.goto(path)
+    const button = page.getByRole('button', { name: submit })
+    await expect(button).toBeEnabled()
+    await button.click()
+    await expect(page.getByRole('alert').filter({ hasText: 'Bitte prüfen Sie' })).toBeFocused()
+    expect(await seriousViolations(page)).toEqual([])
+  })
+}
+
+test('certificate lightbox open', async ({ page }) => {
+  await page.goto('/ueber-uns/')
+  const dialog = page.getByRole('dialog', { name: 'Zertifikat in voller Größe' })
+  await expect(async () => {
+    await page
+      .getByRole('button', { name: /^Vergrößern: / })
+      .first()
+      .click()
+    await expect(dialog).toBeVisible({ timeout: 1_000 })
+  }).toPass()
   expect(await seriousViolations(page)).toEqual([])
 })

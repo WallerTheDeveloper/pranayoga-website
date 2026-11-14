@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
+import { ALL_PAGES } from './pages'
 import { settle } from './settle'
 
 /** No third-party requests and no visitor cookies (fonts, images and scripts are self-hosted). */
@@ -13,7 +14,7 @@ function collectForeignRequests(page: Page, origin: string): string[] {
   return foreign
 }
 
-for (const pagePath of ['/', '/kurse/', '/kurse/hatha-yoga/']) {
+for (const pagePath of [...ALL_PAGES.map((sitePage) => sitePage.path), '/gibt-es-nicht/']) {
   test(`${pagePath} only talks to its own origin and sets no cookies`, async ({
     page,
     context,

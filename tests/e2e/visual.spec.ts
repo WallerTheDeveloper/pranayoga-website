@@ -1,6 +1,7 @@
 import { test } from '@playwright/test'
 
 import { seedCourses } from '../../seed/data/courses'
+import { INFO_PAGES } from './pages'
 import { settle } from './settle'
 
 /**
@@ -47,4 +48,30 @@ test('course page at 390 @mobile', async ({ page }) => {
   await page.goto('/kurse/hatha-yoga/')
   await settle(page)
   await page.screenshot({ path: 'test-results/visual/kurs-hatha-yoga-390.png', fullPage: true })
+})
+
+for (const sitePage of INFO_PAGES) {
+  test(`${sitePage.name} at 1440`, async ({ page }) => {
+    await page.goto(sitePage.path)
+    await settle(page)
+    await page.screenshot({ path: `test-results/visual/${sitePage.name}-1440.png`, fullPage: true })
+  })
+
+  test(`${sitePage.name} at 390 @mobile`, async ({ page }) => {
+    await page.goto(sitePage.path)
+    await settle(page)
+    await page.screenshot({ path: `test-results/visual/${sitePage.name}-390.png`, fullPage: true })
+  })
+}
+
+test('404 at 1440', async ({ page }) => {
+  await page.goto('/gibt-es-nicht/')
+  await settle(page)
+  await page.screenshot({ path: 'test-results/visual/404-1440.png', fullPage: true })
+})
+
+test('404 at 390 @mobile', async ({ page }) => {
+  await page.goto('/gibt-es-nicht/')
+  await settle(page)
+  await page.screenshot({ path: 'test-results/visual/404-390.png', fullPage: true })
 })

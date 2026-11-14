@@ -1,9 +1,9 @@
 import { CACHE_TAGS } from '@/cache/tags'
 
-import { findTrialOffer, toPriceGroup } from './mappers/prices'
+import { findTrialOffer, toPriceGroup, toSignupPlanGroups } from './mappers/prices'
 import { isPresent } from './mappers/values'
 import { READ_OPTIONS, getPayloadClient, readContent } from './source'
-import type { PriceGroupView, TrialOffer } from './types'
+import type { PriceGroupView, SignupPlanGroup, TrialOffer } from './types'
 
 export function getPriceGroups(): Promise<PriceGroupView[]> {
   return readContent({
@@ -27,4 +27,9 @@ export function getPriceGroups(): Promise<PriceGroupView[]> {
 /** The trial lesson ("Probestunde"), or null when no block is marked as the trial. */
 export async function getTrialOffer(): Promise<TrialOffer | null> {
   return findTrialOffer(await getPriceGroups())
+}
+
+/** The Anmeldeformular's plan choices, from the same blocks as the price page. */
+export async function getSignupPlanGroups(): Promise<SignupPlanGroup[]> {
+  return toSignupPlanGroups(await getPriceGroups())
 }

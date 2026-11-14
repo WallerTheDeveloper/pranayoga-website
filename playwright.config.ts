@@ -37,6 +37,9 @@ export default defineConfig({
     locale: 'de-DE',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    // Scroll reveals and the intro would hide content in screenshots and axe runs; the motion
+    // spec opts back in with test.use({ reducedMotion: 'no-preference' }).
+    reducedMotion: 'reduce',
   },
   projects: [
     {

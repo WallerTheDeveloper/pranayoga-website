@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 
 import { SectionIntro } from '@/components/blocks/SectionIntro'
 import { TeacherTrainingTeaser } from '@/components/blocks/TeacherTrainingTeaser'
@@ -16,6 +16,7 @@ import { Section } from '@/components/ui/Section'
 import { TextLink } from '@/components/ui/TextLink'
 import {
   getBusinessSettings,
+  findRedirect,
   getCopyImages,
   getCourse,
   getPageCopy,
@@ -26,7 +27,7 @@ import {
 import type { PageCopy } from '@/content/copy'
 import type { ContactData, CourseDetail, TrialOffer as TrialOfferData } from '@/content/types'
 import { openGraphWithImage } from '@/lib/metadata'
-import { routes } from '@/lib/routes'
+import { isValidSlug, routes } from '@/lib/routes'
 
 interface CoursePageProps {
   params: Promise<{ slug: string }>
@@ -82,7 +83,8 @@ function CourseBooking({ course, trial, copy, groupUrl, contact, flushTop }: Cou
 /**
  * No course paths at build time: each course renders on its first visit and then stays cached
  * until a publish clears it (docs/PLAN.md "Caching"). The deploy warm-up fills them from the
- * sitemap. Unknown slugs get a 404 from `getCourse`, which only accepts listed courses.
+ * sitemap. Unknown slugs get a 404 from `getCourse`, which only accepts listed courses, unless a
+ * stored redirect (the WordPress 301s) knows where that address went.
  */
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   return []
@@ -90,10 +92,21 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
 
 export const dynamicParams = true
 
+/**
+ * No course under this slug: an old WordPress course address (e.g. /kurse/yin-yoga/) moves on to
+ * its new page, anything else is a 404.
+ */
+async function leaveMissingCourse(slug: string): Promise<never> {
+  const target = isValidSlug(slug) ? await findRedirect(routes.course(slug)) : null
+  if (target) permanentRedirect(target)
+  notFound()
+}
+
 export async function generateMetadata({ params }: CoursePageProps): Promise<Metadata> {
   const { slug } = await params
   const course = await getCourse(slug)
-  if (!course) return {}
+  // Thrown here as well as in the page: otherwise the client swaps the 404 title for the default.
+  if (!course) return leaveMissingCourse(slug)
   return {
     title: course.seo.title ? { absolute: course.seo.title } : course.title,
     description: course.seo.description ?? (course.hero.lead || undefined),
@@ -115,7 +128,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     getRelatedCourses(slug),
     getCopyImages(),
   ])
-  if (!course) notFound()
+  if (!course) return leaveMissingCourse(slug)
 
   const { groupUrl } = settings.whatsApp
   const hasBenefits = course.benefits.items.length > 0

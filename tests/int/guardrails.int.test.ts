@@ -257,6 +257,39 @@ describe('redirects', () => {
       }),
     ).rejects.toEqual(fieldError('to.url'))
   })
+
+  it('refuses a redirect to itself and one that closes a loop', async () => {
+    await expect(
+      payload.create({
+        collection: 'redirects',
+        data: { from: '/kreis/', to: { type: 'custom', url: '/Kreis' } },
+        ...SYSTEM,
+      }),
+    ).rejects.toEqual(fieldError('to.url'))
+
+    const first = await payload.create({
+      collection: 'redirects',
+      data: { from: '/schleife-a/', to: { type: 'custom', url: '/schleife-b/' } },
+      ...SYSTEM,
+    })
+    await expect(
+      payload.create({
+        collection: 'redirects',
+        data: { from: '/schleife-b/', to: { type: 'custom', url: '/schleife-a/' } },
+        ...SYSTEM,
+      }),
+    ).rejects.toEqual(fieldError('to.url'))
+
+    // Saving the first one again is fine: it is not compared with itself.
+    await expect(
+      payload.update({
+        collection: 'redirects',
+        id: first.id,
+        data: { to: { type: 'custom', url: '/schleife-b/' } },
+        ...SYSTEM,
+      }),
+    ).resolves.toMatchObject({ from: '/schleife-a/' })
+  })
 })
 
 describe('media in use', () => {

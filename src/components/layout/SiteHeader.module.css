@@ -123,9 +123,11 @@
   }
 }
 
+/* Scoped to .actions: the WhatsApp button sets its own display, and with equal specificity the
+   stylesheet that happens to load last would win. */
 @container page (max-width: 700px) {
-  .pill,
-  .headerCta {
+  .actions .pill,
+  .actions .headerCta {
     display: none;
   }
 }

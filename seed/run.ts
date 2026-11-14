@@ -8,6 +8,7 @@ import { COPY_MEDIA, COPY_MEDIA_KEYS } from '@/content/copy/mediaRefs'
 import { clearDataCache } from '../scripts/clear-data-cache.mjs'
 
 import { seedTechnicalDefaults } from './data/settings'
+import { SEED_FLYER_IMAGE } from './data/teacherTraining'
 import { assertImagesListed, loadManifest } from './manifest'
 import { seedAdmin } from './steps/admin'
 import {
@@ -33,6 +34,7 @@ export async function runSeed(projectDir: string): Promise<void> {
     ...referencedCourseImages(),
     ...COPY_MEDIA_KEYS.map((key) => COPY_MEDIA[key].filename),
     seedTechnicalDefaults.defaultSeoImage,
+    SEED_FLYER_IMAGE,
   ])
 
   const payload = await getPayload({ config })

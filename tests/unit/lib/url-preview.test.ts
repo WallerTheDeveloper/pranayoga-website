@@ -131,8 +131,9 @@ describe('preview paths', () => {
   it('maps documents to their page', () => {
     expect(previewPathFor({ kind: 'global', slug: 'business-settings' })).toBe('/')
     expect(previewPathFor({ kind: 'global', slug: 'technical-settings' })).toBeNull()
-    // The teaser shows on the course overview until the teacher-training page exists (phase 3).
-    expect(previewPathFor({ kind: 'global', slug: 'teacher-training' })).toBe('/kurse/')
+    expect(previewPathFor({ kind: 'global', slug: 'teacher-training' })).toBe('/yogaausbildungen/')
+    expect(previewPathFor({ kind: 'global', slug: 'legal-notice' })).toBe('/impressum/')
+    expect(previewPathFor({ kind: 'global', slug: 'privacy-policy' })).toBe('/datenschutz/')
     expect(
       previewPathFor({ kind: 'collection', slug: 'courses', data: { slug: 'rad-yoga' } }),
     ).toBe('/kurse/rad-yoga/')

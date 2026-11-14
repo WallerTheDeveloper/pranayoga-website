@@ -33,9 +33,12 @@ export function previewPathFor(source: PreviewSource): string | null {
     switch (source.slug) {
       case 'business-settings':
         return routes.home()
-      // The teaser's first home; switches to routes.teacherTraining() with that page (phase 3).
       case 'teacher-training':
-        return routes.courses()
+        return routes.teacherTraining()
+      case 'legal-notice':
+        return routes.legalNotice()
+      case 'privacy-policy':
+        return routes.privacyPolicy()
       default:
         return null
     }

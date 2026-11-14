@@ -269,6 +269,108 @@
       "file": "sport-balance-seated-forward-bend.jpg",
       "alt": "Vorbeuge im Sitzen auf der Matte.",
       "pages": ["course:yoga-sport-balance"]
+    },
+    {
+      "blob": "d0eefb668f593d1d495c4f6b61c915d6",
+      "file": "about-beach-handstand.jpg",
+      "alt": "Handstand am Strand.",
+      "pages": ["about"],
+      "focal": {
+        "x": 50,
+        "y": 35
+      }
+    },
+    {
+      "blob": "89240da410fd699635f98cd59ffe58ca",
+      "file": "about-cliff-standing-balance.jpg",
+      "alt": "Standwaage auf einer Klippe über dem Meer.",
+      "pages": ["about"]
+    },
+    {
+      "blob": "5b9d3ac4465760364854a6f2c60ebd1a",
+      "file": "about-beach-side-plank.jpg",
+      "alt": "Seitstütz mit gestrecktem Bein auf einer Matte am Strand.",
+      "pages": ["about"],
+      "focal": {
+        "x": 30,
+        "y": 50
+      }
+    },
+    {
+      "blob": "3ea65d14f98ace03066a6d2e3b48c987",
+      "file": "about-beach-arm-balance.jpg",
+      "alt": "Armbalance auf einer Matte am Strand.",
+      "pages": ["about"],
+      "focal": {
+        "x": 45,
+        "y": 50
+      }
+    },
+    {
+      "blob": "b3ebb4ab7dcfaea16b6e6fe8ed60f404",
+      "file": "certificate-hatha-200.jpg",
+      "alt": "Hatha Yoga Teacher Training, 200 Stunden – Arhanta Yoga Ashram, Niederlande",
+      "pages": ["about"]
+    },
+    {
+      "blob": "27ce1053b0d1ccc6171ec0d49c119d58",
+      "file": "certificate-yin-50.jpg",
+      "alt": "Yin Yoga Teacher Training, 50 Stunden – Arhanta Yoga",
+      "pages": ["about"]
+    },
+    {
+      "blob": "6c07315ccdba6148641bd030bef5a5da",
+      "file": "certificate-prenatal-85.jpg",
+      "alt": "Prenatal Yoga Teacher Training, 85 Stunden – Arhanta Yoga",
+      "pages": ["about"]
+    },
+    {
+      "blob": "49f0f79c56536165259bb5215fd41915",
+      "file": "certificate-ukrainian-yoga-alliance.jpg",
+      "alt": "Certificate of Appreciation – Ukrainian Yoga Alliance",
+      "pages": ["about"]
+    },
+    {
+      "blob": "b8588d0581e65509f3a2439c4a448683",
+      "file": "certificate-introduction-yoga.jpg",
+      "alt": "Introduction to Yoga Theory and Practice",
+      "pages": ["about"]
+    },
+    {
+      "blob": "f28cc2fe03a541d8f4cbcbf4ebad2c25",
+      "file": "certificate-introduction-yoga-ru.jpg",
+      "alt": "Einführung in Theorie und Praxis des Yoga (russischsprachiges Zertifikat)",
+      "pages": ["about"]
+    },
+    {
+      "blob": "c24602976f260ec91ea79c62806db98e",
+      "file": "wheel-yoga-class-studio.jpg",
+      "alt": "Unterricht im Studio: Teilnehmerinnen üben mit dem Yoga-Rad.",
+      "pages": ["about"]
+    },
+    {
+      "blob": "7698894d1c0339cef0770f305d085003",
+      "file": "teacher-training-reverse-prayer.jpg",
+      "alt": "Hände in umgekehrter Gebetshaltung hinter dem Rücken.",
+      "pages": ["teacher-training"]
+    },
+    {
+      "blob": "e002804ea30211ba2db1174122a78b5d",
+      "file": "teacher-training-flyer.png",
+      "alt": "Flyer Yoga Teacher Training 200: Inhalte, Kosten, Voraussetzungen und Kontakt. Alle Angaben stehen auch auf dieser Seite.",
+      "pages": ["teacher-training"]
+    },
+    {
+      "blob": "74d1974f1aba0adc20df48d197635849",
+      "file": "pricing-cross-legged-arms-up.jpg",
+      "alt": "Yogalehrerin im Schneidersitz mit verschränkten Armen über dem Kopf.",
+      "pages": ["pricing"]
+    },
+    {
+      "blob": "176f014c87ebc3262de879c084aa9110",
+      "file": "contact-side-stretch-window.jpg",
+      "alt": "Yogalehrerin in einer seitlichen Dehnung am Boden vor dem großen Studiofenster.",
+      "pages": ["contact"]
     }
   ]
 }

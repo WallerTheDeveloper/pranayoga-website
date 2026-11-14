@@ -21,6 +21,8 @@ import {
   isSiteOrigin,
   isValidPostalCode,
   normalizeRedirectSource,
+  redirectLoops,
+  sameSiteRedirectPath,
 } from '@/lib/validation/url'
 import { isValidWhatsAppUrl } from '@/lib/validation/whatsapp'
 
@@ -116,12 +118,38 @@ export const validateRedirectSource: TextFieldValidation = async (value, options
     : true
 }
 
+/** Every other stored redirect with a typed target, as normalised source → target. */
+async function otherRedirectTargets(
+  options: Parameters<TextFieldValidation>[1],
+): Promise<Map<string, string>> {
+  const result = await options.req.payload.find({
+    collection: 'redirects',
+    depth: 0,
+    limit: 500,
+    pagination: false,
+    overrideAccess: true,
+    req: options.req,
+  })
+  const pairs = result.docs.flatMap((doc) => {
+    const source = normalizeRedirectSource(doc.from)
+    const url = doc.to?.type === 'custom' ? doc.to.url : null
+    return doc.id !== options.id && source && url ? [[source, url] as const] : []
+  })
+  return new Map(pairs)
+}
+
 export const validateRedirectTarget: TextFieldValidation = async (value, options) => {
   const base = await text(value, options)
   if (base !== true || isEmpty(value)) return base
-  return isSafeRedirectTarget(String(value))
-    ? true
-    : 'Bitte einen Pfad wie /kurse/ oder eine https-Adresse eintragen.'
+  const target = String(value)
+  if (!isSafeRedirectTarget(target)) {
+    return 'Bitte einen Pfad wie /kurse/ oder eine https-Adresse eintragen.'
+  }
+  const from = (options.data as { from?: unknown } | undefined)?.from
+  if (typeof from !== 'string' || sameSiteRedirectPath(target) === null) return true
+  return redirectLoops(from, target, await otherRedirectTargets(options))
+    ? 'Diese Weiterleitung führt im Kreis zurück zur alten Adresse. Bitte ein anderes Ziel wählen.'
+    : true
 }
 
 export const validatePrice: NumberFieldValidation = async (value, options) => {

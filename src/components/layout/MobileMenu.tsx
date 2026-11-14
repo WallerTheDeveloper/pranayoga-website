@@ -11,8 +11,10 @@ import {
   type ReactNode,
 } from 'react'
 
+import { useHydrated } from '@/components/hooks/useHydrated'
 import { CloseIcon, MenuIcon } from '@/components/icons/UiIcons'
 
+import { FOOTER_NAV_ID } from './anchors'
 import styles from './MobileMenu.module.css'
 
 interface MobileMenuProps {
@@ -25,7 +27,11 @@ interface MobileMenuProps {
   children: ReactNode
 }
 
-/** Full-screen menu below 1180 px. Closes on Escape, on the close button and on any link. */
+/**
+ * Full-screen menu below 1180 px. Closes on Escape, on the close button and on any link.
+ * Until the page has hydrated (or without JavaScript) the button is a plain link to the footer
+ * navigation, which lists every page.
+ */
 export function MobileMenu({
   buttonLabel,
   dialogLabel,
@@ -38,6 +44,7 @@ export function MobileMenu({
   const buttonRef = useRef<HTMLButtonElement>(null)
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const hydrated = useHydrated()
 
   const close = useCallback(() => {
     const dialog = dialogRef.current
@@ -58,19 +65,31 @@ export function MobileMenu({
     if ((event.target as HTMLElement).closest('a')) close()
   }
 
+  const buttonContent = (
+    <>
+      <MenuIcon size={22} strokeWidth={1.8} />
+      <span>{buttonLabel}</span>
+    </>
+  )
+
   return (
     <>
-      <button
-        ref={buttonRef}
-        className={styles.button}
-        type="button"
-        aria-expanded={open}
-        aria-controls={dialogId}
-        onClick={openMenu}
-      >
-        <MenuIcon size={22} strokeWidth={1.8} />
-        <span>{buttonLabel}</span>
-      </button>
+      {hydrated ? (
+        <button
+          ref={buttonRef}
+          className={styles.button}
+          type="button"
+          aria-expanded={open}
+          aria-controls={dialogId}
+          onClick={openMenu}
+        >
+          {buttonContent}
+        </button>
+      ) : (
+        <a className={styles.button} href={`#${FOOTER_NAV_ID}`}>
+          {buttonContent}
+        </a>
+      )}
       <dialog
         ref={dialogRef}
         id={dialogId}

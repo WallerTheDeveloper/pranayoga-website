@@ -28,7 +28,10 @@ export function isPortrait(image: ImageData | null): boolean {
   return image !== null && image.height > image.width
 }
 
-/** Sub-page hero (design `.hero-grid`): breadcrumbs, h1 and lead left, photo with rose offset right. */
+/**
+ * Sub-page hero (design `.hero-grid`): breadcrumbs, h1 and lead left, photo with rose offset right.
+ * The `in1`–`in4` and `in-img` classes play the entrance (motion.css).
+ */
 export function PageHero({
   crumbs,
   heading,
@@ -45,13 +48,13 @@ export function PageHero({
       <div className={[styles.inner, tight ? styles.tight : ''].filter(Boolean).join(' ')}>
         <div className={styles.grid}>
           <div className={styles.copy}>
-            <Breadcrumbs items={crumbs} />
-            {kicker}
-            <Heading as="h1" size="page" accent={accent} accentTone="moss">
+            <Breadcrumbs items={crumbs} className="in1" />
+            {kicker ? <div className="in1">{kicker}</div> : null}
+            <Heading as="h1" size="page" accent={accent} accentTone="moss" className="in2">
               {heading}
             </Heading>
-            {lead ? <p className={styles.lead}>{lead}</p> : null}
-            {children}
+            {lead ? <p className={`in3 ${styles.lead}`}>{lead}</p> : null}
+            {children ? <div className={`in4 ${styles.extras}`}>{children}</div> : null}
           </div>
           {image ? (
             <figure className={[styles.figure, portrait ? styles.portrait : ''].join(' ')}>
@@ -64,7 +67,7 @@ export function PageHero({
                     : '(max-width: 960px) min(600px, 100vw), 440px'
                 }
                 aspectRatio={portrait ? '2 / 3' : '3 / 2'}
-                className={styles.photo}
+                className={`in-img ${styles.photo}`}
                 preload
               />
             </figure>

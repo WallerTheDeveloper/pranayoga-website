@@ -39,6 +39,57 @@ export function formatMonthYear(value: string | null | undefined): string | null
   return Number.isFinite(time) ? monthYear.format(time) : null
 }
 
+const dayParts = new Intl.DateTimeFormat('de-DE', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: STUDIO_TIME_ZONE,
+})
+
+interface CalendarDay {
+  day: string
+  month: string
+  year: string
+}
+
+/** Day, month name and year of an admin date on the studio's calendar; null when unparsable. */
+function calendarDay(value: string | null | undefined): CalendarDay | null {
+  if (!value) return null
+  const time = Date.parse(value)
+  if (!Number.isFinite(time)) return null
+  const parts = dayParts.formatToParts(time)
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((entry) => entry.type === type)?.value ?? ''
+  return { day: part('day'), month: part('month'), year: part('year') }
+}
+
+/** "12. November 2026" from an admin date, read on the studio's calendar. Null when unset. */
+export function formatDate(value: string | null | undefined): string | null {
+  const date = calendarDay(value)
+  return date ? `${date.day}. ${date.month} ${date.year}` : null
+}
+
+/**
+ * A weekend or any span of days, as short as German allows: "14.–15. März 2027",
+ * "31. Mai – 1. Juni 2027", "31. Dezember 2027 – 1. Januar 2028". A missing or earlier end
+ * collapses to the single first day. Null without a valid first day.
+ */
+export function formatDateRange(
+  from: string | null | undefined,
+  to: string | null | undefined,
+): string | null {
+  const start = calendarDay(from)
+  if (!start) return null
+  const end = calendarDay(to)
+  const single = `${start.day}. ${start.month} ${start.year}`
+  if (!end || Date.parse(to ?? '') <= Date.parse(from ?? '')) return single
+  if (end.year !== start.year) return `${single} – ${end.day}. ${end.month} ${end.year}`
+  if (end.month !== start.month) {
+    return `${start.day}. ${start.month} – ${end.day}. ${end.month} ${end.year}`
+  }
+  return end.day === start.day ? single : `${start.day}.–${end.day}. ${end.month} ${end.year}`
+}
+
 export const WEEKDAYS = [
   'monday',
   'tuesday',

@@ -62,6 +62,82 @@ export const COPY_MEDIA = {
     tier: 'small',
     place: 'Kursseiten: Ihre Lehrerin',
   },
+  aboutHero: {
+    filename: 'liudmyla-studio-window.jpg',
+    tier: 'feature',
+    place: 'Über uns: Titelbild',
+  },
+  galleryBeachHandstand: {
+    filename: 'about-beach-handstand.jpg',
+    tier: 'card',
+    place: 'Über uns: Yoga unterwegs',
+  },
+  galleryCliffBalance: {
+    filename: 'about-cliff-standing-balance.jpg',
+    tier: 'card',
+    place: 'Über uns: Yoga unterwegs',
+  },
+  galleryBeachSidePlank: {
+    filename: 'about-beach-side-plank.jpg',
+    tier: 'card',
+    place: 'Über uns: Yoga unterwegs',
+  },
+  galleryBeachArmBalance: {
+    filename: 'about-beach-arm-balance.jpg',
+    tier: 'card',
+    place: 'Über uns: Yoga unterwegs',
+  },
+  // Certificates use the large size: the lightbox shows them up to 900 px wide.
+  certificateHatha: {
+    filename: 'certificate-hatha-200.jpg',
+    tier: 'feature',
+    place: 'Über uns: Zertifikate',
+  },
+  certificateYin: {
+    filename: 'certificate-yin-50.jpg',
+    tier: 'feature',
+    place: 'Über uns: Zertifikate',
+  },
+  certificatePrenatal: {
+    filename: 'certificate-prenatal-85.jpg',
+    tier: 'feature',
+    place: 'Über uns: Zertifikate',
+  },
+  certificateAppreciation: {
+    filename: 'certificate-ukrainian-yoga-alliance.jpg',
+    tier: 'feature',
+    place: 'Über uns: Zertifikate',
+  },
+  certificateIntroduction: {
+    filename: 'certificate-introduction-yoga.jpg',
+    tier: 'feature',
+    place: 'Über uns: Zertifikate',
+  },
+  certificateIntroductionRu: {
+    filename: 'certificate-introduction-yoga-ru.jpg',
+    tier: 'feature',
+    place: 'Über uns: Zertifikate',
+  },
+  aboutStudio: {
+    filename: 'wheel-yoga-class-studio.jpg',
+    tier: 'feature',
+    place: 'Über uns: Das Studio',
+  },
+  teacherTrainingHero: {
+    filename: 'teacher-training-reverse-prayer.jpg',
+    tier: 'feature',
+    place: 'Yogaausbildungen: Titelbild',
+  },
+  pricingHero: {
+    filename: 'pricing-cross-legged-arms-up.jpg',
+    tier: 'feature',
+    place: 'Mitgliedschaft & Preise: Titelbild',
+  },
+  contactHero: {
+    filename: 'contact-side-stretch-window.jpg',
+    tier: 'feature',
+    place: 'Kontakt: Titelbild',
+  },
 } as const satisfies Record<string, CopyMediaRef>
 
 export type CopyMediaKey = keyof typeof COPY_MEDIA

@@ -1,5 +1,3 @@
-import Image from 'next/image'
-
 import { QuoteMark } from '@/components/icons/UiIcons'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { Heading } from '@/components/ui/Heading'
@@ -9,6 +7,7 @@ import type { CopyImages } from '@/content/media'
 import { teacherCopy } from '@/content/copy/teacher'
 import { routes } from '@/lib/routes'
 
+import { SealList } from './SealList'
 import styles from './TeacherCard.module.css'
 
 interface TeacherCardProps {
@@ -40,23 +39,7 @@ export function TeacherCard({ images, headingId }: TeacherCardProps) {
           <QuoteMark color="var(--color-clay)" className={styles.quoteMark} />
           <p className={`serif ${styles.quoteText}`}>{copy.quote}</p>
         </blockquote>
-        <ul className={styles.seals} aria-label={copy.sealsLabel}>
-          {copy.seals.map((seal) => {
-            const image = images[seal.image]
-            return (
-              <li key={seal.title} className={styles.seal}>
-                {image ? (
-                  <span className={styles.sealImage}>
-                    {/* The title below names the seal, so the image itself is decorative. */}
-                    <Image src={image.src} alt="" fill sizes="88px" />
-                  </span>
-                ) : null}
-                <span className={`serif ${styles.sealTitle}`}>{seal.title}</span>
-                <span className={styles.sealIssuer}>{seal.issuer}</span>
-              </li>
-            )
-          })}
-        </ul>
+        <SealList images={images} />
         <TextLink href={routes.about()} className={styles.more}>
           {copy.moreLink}
         </TextLink>

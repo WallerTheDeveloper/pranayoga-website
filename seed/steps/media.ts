@@ -43,6 +43,13 @@ async function findByFilename(payload: Payload, filename: string) {
   return result.docs[0]
 }
 
+/** Alt text, plus the focal point when the manifest sets one (otherwise Payload's centre). */
+function imageData(image: SeedImage): { alt: string; focalX?: number; focalY?: number } {
+  return image.focal
+    ? { alt: image.alt, focalX: image.focal.x, focalY: image.focal.y }
+    : { alt: image.alt }
+}
+
 async function upsertImage(
   payload: Payload,
   image: SeedImage,
@@ -50,14 +57,13 @@ async function upsertImage(
   staticDir: string,
 ): Promise<number> {
   const existing = await findByFilename(payload, image.file)
+  const data = imageData(image)
   if (existing) {
-    if (existing.alt !== image.alt) {
-      await payload.update({
-        collection: 'media',
-        id: existing.id,
-        data: { alt: image.alt },
-        ...SEED_WRITE,
-      })
+    const focalChanged =
+      existing.focalX !== (data.focalX ?? existing.focalX) ||
+      existing.focalY !== (data.focalY ?? existing.focalY)
+    if (existing.alt !== image.alt || focalChanged) {
+      await payload.update({ collection: 'media', id: existing.id, data, ...SEED_WRITE })
     }
     return existing.id
   }
@@ -68,7 +74,7 @@ async function upsertImage(
 
   const created = await payload.create({
     collection: 'media',
-    data: { alt: image.alt },
+    data,
     filePath: path.join(imagesDir, image.file),
     ...SEED_WRITE,
   })
@@ -78,7 +84,7 @@ async function upsertImage(
   return created.id
 }
 
-/** Uploads every manifest image once; re-runs only refresh the alt text. */
+/** Uploads every manifest image once; re-runs only refresh the alt text and focal point. */
 export async function seedMedia(
   payload: Payload,
   images: readonly SeedImage[],

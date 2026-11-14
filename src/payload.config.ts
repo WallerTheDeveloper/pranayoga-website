@@ -10,12 +10,14 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
 import { Courses } from './collections/Courses'
+import { Downloads } from './collections/Downloads'
 import { Media } from './collections/Media'
 import { PriceGroups } from './collections/PriceGroups'
 import { redirectsPluginConfig } from './collections/redirects'
 import { Reviews } from './collections/Reviews'
 import { Users } from './collections/Users'
 import { BusinessSettings } from './globals/BusinessSettings'
+import { LegalNotice, PrivacyPolicy } from './globals/legal'
 import { TeacherTraining } from './globals/TeacherTraining'
 import { TechnicalSettings } from './globals/TechnicalSettings'
 import { getServerEnv } from './lib/env'
@@ -39,7 +41,7 @@ export default buildConfig({
     meta: { titleSuffix: ' · Pranayoga Admin' },
     livePreview: {
       collections: [Courses.slug, PriceGroups.slug, Reviews.slug],
-      globals: [BusinessSettings.slug, TeacherTraining.slug],
+      globals: [BusinessSettings.slug, TeacherTraining.slug, LegalNotice.slug, PrivacyPolicy.slug],
       breakpoints: [
         { name: 'mobile', label: 'Handy', width: 390, height: 844 },
         { name: 'tablet', label: 'Tablet', width: 768, height: 1024 },
@@ -64,8 +66,8 @@ export default buildConfig({
     supportedLanguages: { de, en },
     fallbackLanguage: 'de',
   },
-  collections: [Courses, PriceGroups, Reviews, Media, Users],
-  globals: [BusinessSettings, TeacherTraining, TechnicalSettings],
+  collections: [Courses, PriceGroups, Reviews, Media, Downloads, Users],
+  globals: [BusinessSettings, TeacherTraining, LegalNotice, PrivacyPolicy, TechnicalSettings],
   editor: lexicalEditor(),
   graphQL: { disable: true },
   cors: [env.NEXT_PUBLIC_SERVER_URL],

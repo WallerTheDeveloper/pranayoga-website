@@ -6,6 +6,7 @@ import type {
   PriceBadge,
   PriceBlockView,
   PriceGroupView,
+  SignupPlanGroup,
   TrialOffer,
 } from '../types'
 import { asArray, asBoolean, cleanText, isPresent, rowId } from './values'
@@ -91,4 +92,24 @@ export function findTrialOffer(groups: readonly PriceGroupView[]): TrialOffer | 
     }
   }
   return null
+}
+
+/** "1× pro Woche – 59 € pro Monat"; just the name while the price is not set. */
+export function signupPlanLabel(
+  block: Pick<PriceBlockView, 'name' | 'priceLabel' | 'unit'>,
+): string {
+  if (!block.priceLabel) return block.name
+  return `${block.name} – ${[block.priceLabel, block.unit].filter(Boolean).join(' ')}`
+}
+
+/** The Anmeldeformular's choices: blocks marked "selectable", grouped like on the price page. */
+export function toSignupPlanGroups(groups: readonly PriceGroupView[]): SignupPlanGroup[] {
+  return groups
+    .map((group) => ({
+      label: group.kicker || group.title,
+      plans: group.blocks
+        .filter((block) => block.showInSignupForm)
+        .map((block) => ({ id: block.id, label: signupPlanLabel(block) })),
+    }))
+    .filter((group) => group.plans.length > 0)
 }

@@ -1,6 +1,10 @@
 import { CACHE_TAGS } from '@/cache/tags'
 import { isValidSlug, routes } from '@/lib/routes'
-import { isSafeRedirectTarget, normalizeRedirectSource } from '@/lib/validation/url'
+import {
+  isSafeRedirectTarget,
+  normalizeRedirectSource,
+  sameSiteRedirectPath,
+} from '@/lib/validation/url'
 import type { Redirect } from '@/payload-types'
 
 import { getPayloadClient, readContent } from './source'
@@ -39,7 +43,9 @@ export async function findRedirect(path: string): Promise<string | null> {
       return Object.fromEntries(
         result.docs.flatMap((doc) => {
           const target = redirectTarget(doc)
-          return target ? [[doc.from, target] as const] : []
+          // A redirect to itself would bounce forever; the address answers 404 instead.
+          const pointsHome = target !== null && sameSiteRedirectPath(target) === doc.from
+          return target && !pointsHome ? [[doc.from, target] as const] : []
         }),
       )
     },

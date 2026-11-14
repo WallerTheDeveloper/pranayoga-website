@@ -1,0 +1,101 @@
+/* Legal pages: one reading column, 18 px body text, at most 72 characters per line. */
+.inner {
+  max-width: calc(72ch + 2 * var(--gutter));
+  margin: 0 auto;
+  padding: clamp(32px, 4cqi, 64px) var(--gutter) var(--section-space);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--text-h1);
+  line-height: var(--leading-h1);
+  font-weight: 380;
+  letter-spacing: -0.02em;
+  overflow-wrap: break-word;
+  hyphens: manual;
+}
+
+.updated {
+  margin: 0;
+  color: var(--color-ink-muted);
+}
+
+.pending {
+  margin: 0;
+  padding: 20px 24px;
+  border-radius: var(--radius-card);
+  background: var(--color-sand);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px;
+  border-radius: var(--radius-card);
+  background: var(--color-sand);
+  font-style: normal;
+}
+
+.card strong {
+  font-weight: 650;
+}
+
+.prose {
+  max-width: 72ch;
+}
+
+.prose h2 {
+  margin: 40px 0 12px;
+  font-family: var(--font-serif);
+  font-variation-settings: var(--serif-variation);
+  font-size: var(--text-h3-small);
+  line-height: var(--leading-h3);
+  font-weight: 450;
+}
+
+.prose h3 {
+  margin: 28px 0 8px;
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 650;
+}
+
+.prose p,
+.prose ul,
+.prose ol,
+.prose blockquote {
+  margin: 0 0 16px;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 24px;
+}
+
+.prose li + li {
+  margin-top: 6px;
+}
+
+.prose blockquote {
+  padding-left: 16px;
+  border-left: 3px solid var(--color-clay);
+}
+
+.prose a {
+  overflow-wrap: anywhere;
+  text-underline-offset: 3px;
+}
+
+.prose hr {
+  margin: 32px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}

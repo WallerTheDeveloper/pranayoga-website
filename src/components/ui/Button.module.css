@@ -79,3 +79,13 @@
     transform: none;
   }
 }
+
+/* A form that is sending: still focusable and announced, but does nothing. */
+.root[aria-disabled='true'] {
+  cursor: progress;
+  opacity: 0.75;
+}
+
+.root[aria-disabled='true']:active {
+  transform: none;
+}

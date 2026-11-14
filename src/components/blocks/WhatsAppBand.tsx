@@ -7,8 +7,17 @@ import type { ContactData } from '@/content/types'
 
 import styles from './WhatsAppBand.module.css'
 
+/** A different WhatsApp target than the group, e.g. Liudmyla's personal chat. */
+export interface WhatsAppCta {
+  href: string | null
+  label: string
+  ariaLabel: string
+}
+
 interface WhatsAppBandProps {
   groupUrl: string | null
+  /** Replaces the group button ("Termin über WhatsApp") with another chat. */
+  cta?: WhatsAppCta
   contact: ContactData
   /** "Lieber persönlich?" before the chips and "E-Mail schreiben" (hero, menu); else the address. */
   personalPrompt?: boolean
@@ -20,6 +29,7 @@ interface WhatsAppBandProps {
 /** The booking block: WhatsApp first, phone and email as the quieter alternatives. */
 export function WhatsAppBand({
   groupUrl,
+  cta,
   contact,
   personalPrompt = true,
   hint,
@@ -27,16 +37,21 @@ export function WhatsAppBand({
 }: WhatsAppBandProps) {
   const copy = sharedCopy.whatsApp
   const hasChips = Boolean(contact.phoneHref || contact.emailHref)
+  const button = cta ?? {
+    href: groupUrl,
+    label: copy.bookLabel,
+    ariaLabel: copy.bookAriaLabel,
+  }
   return (
     <div className={[styles.root, className ?? ''].filter(Boolean).join(' ')}>
-      <AdminValue value={groupUrl}>
+      <AdminValue value={button.href}>
         {(href) => (
           <>
             <div className={styles.buttonRow}>
               <WhatsAppButton
                 href={href}
-                label={copy.bookLabel}
-                ariaLabel={copy.bookAriaLabel}
+                label={button.label}
+                ariaLabel={button.ariaLabel}
                 withArrow
               />
             </div>

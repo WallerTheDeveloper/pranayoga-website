@@ -1,0 +1,66 @@
+/* Anmeldeformular: form 7 parts, "Gut zu wissen" 5 parts (design `.split-r`). */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: clamp(40px, 6cqi, 96px);
+  align-items: start;
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 28px;
+  border-radius: var(--radius-card);
+  background: var(--color-sand);
+  position: sticky;
+  top: 112px;
+}
+
+.title {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 450;
+}
+
+.text {
+  margin: 0;
+  font-size: 17px;
+  color: var(--color-ink-muted);
+}
+
+.link {
+  align-self: flex-start;
+}
+
+.contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.prompt {
+  margin: 0;
+  font-weight: 650;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@container page (max-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+
+  .aside {
+    position: static;
+  }
+}

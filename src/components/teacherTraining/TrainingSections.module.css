@@ -1,0 +1,357 @@
+/* Yogaausbildungen (Yogaausbildungen.dc.html). */
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.body {
+  margin: 0;
+  max-width: 600px;
+}
+
+.muted {
+  margin: 0;
+  max-width: 640px;
+  color: var(--color-ink-muted);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 72px;
+  align-items: center;
+}
+
+.alignStart {
+  align-items: start;
+}
+
+/* Facts under the hero. */
+.facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 0 32px;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 24px 0;
+  border-top: 1.5px solid var(--color-ink);
+}
+
+.factValue {
+  font-size: clamp(40px, 4.4cqi, 60px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.factLabel {
+  margin: 0;
+  font-size: var(--text-meta);
+  color: var(--color-ink-muted);
+}
+
+/* Language pills. */
+.languages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.language {
+  display: inline-flex;
+  align-items: center;
+  min-height: 64px;
+  padding: 0 28px;
+  border-radius: var(--radius-pill);
+  background: var(--color-linen);
+  font-size: 26px;
+}
+
+/* Topics. */
+.topics {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin-top: clamp(56px, 7cqi, 104px);
+}
+
+.topicGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 20px;
+}
+
+.topic {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 28px;
+  border-radius: var(--radius-card);
+  background: var(--color-linen);
+}
+
+.topicNumber {
+  font-size: 40px;
+  line-height: 1;
+  font-style: italic;
+  color: var(--color-moss);
+}
+
+.topicTitle {
+  margin: 0;
+  font-size: 25px;
+  line-height: 1.2;
+  font-weight: 450;
+}
+
+.topicText {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--color-ink-muted);
+}
+
+/* Dates on moss. */
+.onDarkText {
+  margin: 0;
+  max-width: 460px;
+  color: var(--color-moss-light);
+}
+
+.onDarkMeta {
+  margin: 8px 0 0;
+  font-size: var(--text-meta);
+  color: var(--color-moss-light);
+}
+
+.weekends {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgba(246, 240, 230, 0.18);
+}
+
+.weekend {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(246, 240, 230, 0.18);
+}
+
+/* Costs and requirements, side by side. */
+.twoColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(40px, 6cqi, 96px);
+  align-items: start;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.costs {
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.costRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 24px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.costRow dt {
+  font-size: 17px;
+  color: var(--color-ink-muted);
+}
+
+.costRow dd {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 650;
+  text-align: right;
+}
+
+.requirements {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.requirements li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+.check {
+  flex: none;
+  margin-top: 2px;
+  color: var(--color-moss);
+}
+
+.certification {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 24px;
+  border-radius: var(--radius-card);
+  background: var(--color-sand);
+}
+
+.certificationEyebrow {
+  margin: 0;
+  font-size: var(--text-label);
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-moss);
+}
+
+.certificationText {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.teacher {
+  margin: 0;
+  font-size: var(--text-meta);
+  color: var(--color-ink-muted);
+}
+
+/* Signup steps beside the flyer (design `.split-r`). */
+.signupGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 72px;
+  align-items: start;
+}
+
+.signupColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.step {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 22px 0;
+  border-top: 1px solid var(--line);
+}
+
+.stepNumber {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: var(--color-moss);
+  color: var(--color-linen);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.stepText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stepTitle {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 450;
+}
+
+.booking {
+  margin-top: 8px;
+}
+
+.flyer {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-self: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+.flyerImage {
+  box-shadow: var(--shadow-card);
+}
+
+.flyerCaption {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: var(--text-small);
+  color: var(--color-ink-muted);
+}
+
+.flyerLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-moss);
+  font-weight: 650;
+  text-underline-offset: 4px;
+}
+
+/* Hero: "Fragen zur Ausbildung?" above the personal WhatsApp button. */
+.questions {
+  margin: 8px 0 0;
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+@container page (max-width: 960px) {
+  .split,
+  .signupGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+}
+
+@container page (max-width: 760px) {
+  .twoColumns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

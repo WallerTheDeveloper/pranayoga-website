@@ -127,7 +127,7 @@ blockquote {
   }
 }
 
-/* Scroll reveals, the hero entrance and the Prana breath ring arrive in phase 3 (docs/PLAN.md). */
+/* Hero entrance, scroll reveal, breath ring, intro loader and page crossfade: motion.css. */
 
 /* Reduced motion: no movement, only short colour changes (Main.dc.html §06). */
 @media (prefers-reduced-motion: reduce) {

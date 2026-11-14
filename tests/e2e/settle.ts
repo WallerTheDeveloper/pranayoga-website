@@ -2,8 +2,8 @@ import { expect, type Page } from '@playwright/test'
 
 /**
  * Waits until the page looks finished: fonts loaded, every lazy image scrolled into view once and
- * every rendered image decoded. Use this instead of `networkidle`: link prefetches whose target
- * answers 404 (pages from later phases) keep their body unread, so the network never goes idle.
+ * every rendered image decoded. Use this instead of `networkidle`: streamed link prefetches can
+ * keep a request open, so the network may never go idle.
  */
 export async function settle(page: Page): Promise<void> {
   await page.waitForLoadState('load')

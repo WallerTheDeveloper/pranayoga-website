@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
 
+import { INFO_PAGES } from './pages'
+
 /** Phone layout (390 px): full-screen menu and the bottom action bar. */
 
 test.beforeEach(async ({ page }) => {
@@ -74,9 +76,43 @@ test('the action bar offers WhatsApp, call and email @mobile', async ({ page }) 
   )
 })
 
+test('on the teacher-training page the action bar opens the personal chat @mobile', async ({
+  page,
+}) => {
+  await page.goto('/yogaausbildungen/')
+  const bar = page.getByRole('region', { name: 'Kontakt' })
+  await expect(
+    bar.getByRole('link', { name: 'Persönlich schreiben (öffnet WhatsApp)' }),
+  ).toHaveAttribute('href', 'https://wa.me/491755830372')
+})
+
 test('the page does not scroll sideways @mobile', async ({ page }) => {
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   )
   expect(overflow).toBeLessThanOrEqual(0)
+})
+
+for (const sitePage of INFO_PAGES) {
+  test(`${sitePage.path} does not scroll sideways @mobile`, async ({ page }) => {
+    await page.goto(sitePage.path)
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    )
+    expect(overflow).toBeLessThanOrEqual(0)
+  })
+}
+
+test.describe('without JavaScript', () => {
+  test.use({ javaScriptEnabled: false })
+
+  test('the menu button jumps to the footer navigation @mobile', async ({ page }) => {
+    const menu = page.getByRole('link', { name: 'Menü', exact: true })
+    await expect(menu).toHaveAttribute('href', '#footer-nav')
+    await menu.click()
+    await expect(page).toHaveURL(/#footer-nav$/)
+    await expect(
+      page.locator('#footer-nav').getByRole('link', { name: /Hatha Yoga/ }),
+    ).toBeVisible()
+  })
 })

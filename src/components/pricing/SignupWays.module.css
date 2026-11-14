@@ -1,0 +1,143 @@
+/* "So melden Sie sich an" on the price page: three cards, the bank card in ink. */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lead {
+  margin: 0;
+  max-width: 640px;
+  color: var(--color-ink-muted);
+}
+
+.ways {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+.way {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 32px;
+  border-radius: var(--radius-card);
+  background: var(--color-sand);
+  min-width: 0;
+}
+
+.dark {
+  background: var(--color-ink);
+  color: var(--color-linen);
+}
+
+.disc {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: var(--color-moss-light);
+  color: var(--color-moss);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark .disc {
+  background: rgba(246, 240, 230, 0.12);
+  color: var(--color-linen);
+}
+
+.title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 450;
+  line-height: 1.2;
+}
+
+.text {
+  margin: 0;
+  font-size: 17px;
+  color: var(--color-ink-muted);
+}
+
+.action {
+  margin-top: auto;
+}
+
+.bank {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: var(--text-meta);
+}
+
+.bank dt {
+  color: var(--color-clay);
+}
+
+.bank dd {
+  margin: 0;
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+.ibanRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.iban {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+}
+
+.copyButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--color-linen);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-linen);
+  font: inherit;
+  font-size: var(--text-small);
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color var(--duration-color) var(--ease);
+}
+
+.copyButton:hover {
+  background: rgba(246, 240, 230, 0.12);
+}
+
+.copyButton:focus-visible {
+  outline: 3px solid var(--color-linen);
+  outline-offset: var(--focus-offset);
+}
+
+/* The status line keeps its height, so the card does not jump when it speaks. */
+.copyStatus {
+  flex-basis: 100%;
+  margin: 0;
+  min-height: 22px;
+  font-size: var(--text-small);
+  color: var(--color-moss-light);
+}

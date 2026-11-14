@@ -13,7 +13,13 @@
   font: inherit;
   font-size: 17px;
   font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
+}
+
+/* The pre-hydration link variant keeps the button's look. */
+a.button:hover {
+  color: var(--color-ink);
 }
 
 .button:focus-visible {

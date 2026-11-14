@@ -1,9 +1,11 @@
 /** The only way pages read content (docs/PLAN.md "Content strategy"). */
 export { getPageCopy } from './copy'
 export { getCourse, getCourses, getRelatedCourses } from './courses'
+export { getDownloads } from './downloads'
+export { getLegalPage, type LegalPageSlug } from './legal'
 export { getCopyImages, type CopyImages } from './media'
-export { getPriceGroups, getTrialOffer } from './prices'
+export { getPriceGroups, getSignupPlanGroups, getTrialOffer } from './prices'
 export { findRedirect } from './redirects'
 export { getBusinessSettings, getReviews, getTechnicalSettings } from './settings'
-export { getTeacherTraining } from './teacherTraining'
+export { getTeacherTraining, getTeacherTrainingPage } from './teacherTraining'
 export type * from './types'

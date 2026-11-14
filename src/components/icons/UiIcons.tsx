@@ -195,3 +195,56 @@ export function QuoteMark({ color, className }: QuoteMarkProps) {
     </svg>
   )
 }
+
+export function DownloadIcon(props: IconProps) {
+  return (
+    <IconBase grid={24} defaultStroke={1.9} {...props}>
+      <path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14" />
+    </IconBase>
+  )
+}
+
+export function CopyIcon(props: IconProps) {
+  return (
+    <IconBase grid={24} defaultStroke={1.8} {...props}>
+      <rect x="8.5" y="8.5" width="11" height="11" rx="2" />
+      <path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2" />
+    </IconBase>
+  )
+}
+
+/** A form being filled in: "Online anmelden". */
+export function FormIcon(props: IconProps) {
+  return (
+    <IconBase grid={24} defaultStroke={1.75} {...props}>
+      <rect x="5" y="3.5" width="14" height="17" rx="2" />
+      <path d="M8.5 8h7M8.5 12h7M8.5 16h4" />
+    </IconBase>
+  )
+}
+
+/** A bank building: "Per Überweisung". */
+export function BankIcon(props: IconProps) {
+  return (
+    <IconBase grid={24} defaultStroke={1.75} {...props}>
+      <path d="M3.5 9.5 12 4.5l8.5 5M5 20h14M6.5 10.5v6.5M10.5 10.5v6.5M13.5 10.5v6.5M17.5 10.5v6.5" />
+    </IconBase>
+  )
+}
+
+export function ArrowLeftIcon(props: IconProps) {
+  return (
+    <IconBase grid={24} defaultStroke={2} {...props}>
+      <path d="M19 12H5M11 6l-6 6 6 6" />
+    </IconBase>
+  )
+}
+
+export function AlertIcon(props: IconProps) {
+  return (
+    <IconBase grid={24} defaultStroke={1.9} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7.5v5.5M12 16.4v.1" />
+    </IconBase>
+  )
+}

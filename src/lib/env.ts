@@ -41,9 +41,10 @@ export function parseServerEnv(source: Readonly<Record<string, string | undefine
 }
 
 export const DEFAULT_MEDIA_DIR = 'uploads/media'
+export const DEFAULT_DOWNLOADS_DIR = 'uploads/downloads'
 
 /** A folder below the project root: relative, no `..` segments, no drive or leading slash. */
-const mediaDirSchema = z
+const uploadDirSchema = z
   .string()
   .trim()
   .min(1)
@@ -51,20 +52,29 @@ const mediaDirSchema = z
     message: 'must be a relative folder inside the project',
   })
 
+type EnvSource = Readonly<Record<string, string | undefined>>
+
+function uploadDir(source: EnvSource, name: 'MEDIA_DIR' | 'DOWNLOADS_DIR', fallback: string) {
+  const raw = source[name]
+  if (raw === undefined || raw.trim() === '') return fallback
+  const result = uploadDirSchema.safeParse(raw)
+  if (!result.success)
+    throw new EnvValidationError([`${name}: ${result.error.issues[0]?.message ?? 'invalid'}`])
+  return result.data
+}
+
 /**
  * Upload folder, relative to the project root. Optional (defaults to uploads/media); the test
  * environment sets its own so a test seed never collides with files the dev database owns.
  * Separate from the main schema because the Media collection reads it at import time.
  */
-export function getMediaDir(
-  source: Readonly<Record<string, string | undefined>> = process.env,
-): string {
-  const raw = source.MEDIA_DIR
-  if (raw === undefined || raw.trim() === '') return DEFAULT_MEDIA_DIR
-  const result = mediaDirSchema.safeParse(raw)
-  if (!result.success)
-    throw new EnvValidationError([`MEDIA_DIR: ${result.error.issues[0]?.message ?? 'invalid'}`])
-  return result.data
+export function getMediaDir(source: EnvSource = process.env): string {
+  return uploadDir(source, 'MEDIA_DIR', DEFAULT_MEDIA_DIR)
+}
+
+/** PDF folder for the downloads collection (defaults to uploads/downloads), like MEDIA_DIR. */
+export function getDownloadsDir(source: EnvSource = process.env): string {
+  return uploadDir(source, 'DOWNLOADS_DIR', DEFAULT_DOWNLOADS_DIR)
 }
 
 let cached: ServerEnv | undefined

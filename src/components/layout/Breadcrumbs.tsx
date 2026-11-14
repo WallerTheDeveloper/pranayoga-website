@@ -14,12 +14,13 @@ export interface Crumb {
 interface BreadcrumbsProps {
   /** Trail after "Startseite", ending with the current page. */
   items: readonly Crumb[]
+  className?: string
 }
 
-export function Breadcrumbs({ items }: BreadcrumbsProps) {
+export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
   const trail: Crumb[] = [{ label: sharedCopy.breadcrumbs.home, href: routes.home() }, ...items]
   return (
-    <nav aria-label={sharedCopy.breadcrumbs.label}>
+    <nav aria-label={sharedCopy.breadcrumbs.label} className={className}>
       <ol className={styles.list}>
         {trail.map((crumb, index) => {
           const isLast = index === trail.length - 1

@@ -71,6 +71,7 @@ export interface Config {
     'price-groups': PriceGroup;
     reviews: Review;
     media: Media;
+    downloads: Download;
     users: User;
     redirects: Redirect;
     'payload-kv': PayloadKv;
@@ -84,6 +85,7 @@ export interface Config {
     'price-groups': PriceGroupsSelect<false> | PriceGroupsSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    downloads: DownloadsSelect<false> | DownloadsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -98,11 +100,15 @@ export interface Config {
   globals: {
     'business-settings': BusinessSetting;
     'teacher-training': TeacherTraining;
+    'legal-notice': LegalNotice;
+    'privacy-policy': PrivacyPolicy;
     'technical-settings': TechnicalSetting;
   };
   globalsSelect: {
     'business-settings': BusinessSettingsSelect<false> | BusinessSettingsSelect<true>;
     'teacher-training': TeacherTrainingSelect<false> | TeacherTrainingSelect<true>;
+    'legal-notice': LegalNoticeSelect<false> | LegalNoticeSelect<true>;
+    'privacy-policy': PrivacyPolicySelect<false> | PrivacyPolicySelect<true>;
     'technical-settings': TechnicalSettingsSelect<false> | TechnicalSettingsSelect<true>;
   };
   locale: null;
@@ -386,6 +392,34 @@ export interface Review {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * PDF files to download. For a new version, replace the file in the same entry.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "downloads".
+ */
+export interface Download {
+  id: number;
+  /**
+   * e.g. "Mitgliedsvertrag 2027"
+   */
+  title: string;
+  /**
+   * Each usage belongs to one file at most. Empty = the file is not linked anywhere.
+   */
+  usage?: ('membership-contract' | 'teacher-training-flyer') | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
  * Technical: accounts for the admin panel.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -476,6 +510,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'downloads';
+        value: number | Download;
       } | null)
     | ({
         relationTo: 'users';
@@ -719,6 +757,25 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "downloads_select".
+ */
+export interface DownloadsSelect<T extends boolean = true> {
+  title?: T;
+  usage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -851,7 +908,7 @@ export interface BusinessSetting {
   createdAt?: string | null;
 }
 /**
- * Start, price and the teaser block on the course pages and the course overview.
+ * Dates, prices, topics and requirements of the teacher training, plus the teaser block on the course pages. Empty fields are hidden on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "teacher-training".
@@ -863,9 +920,68 @@ export interface TeacherTraining {
    */
   startMonth?: string | null;
   /**
+   * Empty = the end is not mentioned.
+   */
+  endMonth?: string | null;
+  /**
    * Empty = not set yet; the price line is hidden.
    */
   price?: number | null;
+  /**
+   * Empty = the deposit is not mentioned.
+   */
+  deposit?: number | null;
+  /**
+   * As a duration, e.g. "14 Tage" or "4 Wochen". Empty = not mentioned.
+   */
+  depositDeadline?: string | null;
+  /**
+   * As a duration, e.g. "14 Tage" or "4 Wochen". Empty = not mentioned.
+   */
+  balanceDeadline?: string | null;
+  /**
+   * e.g. "20 % Rabatt". Empty = the line is hidden.
+   */
+  membershipDiscount?: string | null;
+  /**
+   * In date order. The first weekend is the start date.
+   */
+  weekends?:
+    | {
+        from: string;
+        to?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  topics?:
+    | {
+        title: string;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Lines with [square brackets] count as not filled in and are hidden on the site.
+   */
+  requirements?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Empty or with [square brackets] = the "Zertifizierung" box is hidden.
+   */
+  certification?: string | null;
+  /**
+   * "Flyer öffnen" opens the PDF in Downloads (usage "Flyer"), or else the full-size image.
+   */
+  flyer?: {
+    /**
+     * Card image: shorter side at least 440 pixels.
+     */
+    image?: (number | null) | Media;
+  };
   /**
    * Green block with the "Zur Yogaausbildung" button on every course page and the overview.
    */
@@ -893,6 +1009,74 @@ export interface TeacherTraining {
      */
     priceNote?: string | null;
   };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Legal text. Paste only the text provided by your legal advisor.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-notice".
+ */
+export interface LegalNotice {
+  id: number;
+  /**
+   * Shown as "Stand: …" under the heading. Empty = not shown.
+   */
+  updatedOn?: string | null;
+  /**
+   * Format section titles as "Heading 2". Paragraphs with placeholders in square brackets [ … ] stay hidden on the website.
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Legal text. Paste only the text provided by your legal advisor.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "privacy-policy".
+ */
+export interface PrivacyPolicy {
+  id: number;
+  /**
+   * Shown as "Stand: …" under the heading. Empty = not shown.
+   */
+  updatedOn?: string | null;
+  /**
+   * Format section titles as "Heading 2". Paragraphs with placeholders in square brackets [ … ] stay hidden on the website.
+   */
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -986,7 +1170,38 @@ export interface BusinessSettingsSelect<T extends boolean = true> {
  */
 export interface TeacherTrainingSelect<T extends boolean = true> {
   startMonth?: T;
+  endMonth?: T;
   price?: T;
+  deposit?: T;
+  depositDeadline?: T;
+  balanceDeadline?: T;
+  membershipDiscount?: T;
+  weekends?:
+    | T
+    | {
+        from?: T;
+        to?: T;
+        id?: T;
+      };
+  topics?:
+    | T
+    | {
+        title?: T;
+        text?: T;
+        id?: T;
+      };
+  requirements?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  certification?: T;
+  flyer?:
+    | T
+    | {
+        image?: T;
+      };
   teaser?:
     | T
     | {
@@ -1001,6 +1216,30 @@ export interface TeacherTrainingSelect<T extends boolean = true> {
             };
         priceNote?: T;
       };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-notice_select".
+ */
+export interface LegalNoticeSelect<T extends boolean = true> {
+  updatedOn?: T;
+  content?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "privacy-policy_select".
+ */
+export interface PrivacyPolicySelect<T extends boolean = true> {
+  updatedOn?: T;
+  content?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;

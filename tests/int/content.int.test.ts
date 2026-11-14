@@ -192,6 +192,11 @@ beforeAll(async () => {
     data: { from: '/alte-seite/', to: { type: 'custom', url: '/kontakt/' } },
     ...SYSTEM,
   })
+  // Stored before the loop check existed: written past validation, straight to the database.
+  await payload.db.create({
+    collection: 'redirects',
+    data: { from: '/im-kreis/', to: { type: 'custom', url: '/im-kreis/' } },
+  })
 })
 
 afterEach(() => {
@@ -325,6 +330,10 @@ describe('redirects', () => {
     expect(await findRedirect('/alte-seite/')).toBe('/kontakt/')
     expect(await findRedirect('/unbekannt/')).toBeNull()
     expect(await findRedirect('/admin/')).toBeNull()
+  })
+
+  it('ignores a stored redirect to itself, so the address answers 404 instead of looping', async () => {
+    expect(await findRedirect('/im-kreis/')).toBeNull()
   })
 
   it('drops broken targets', () => {
