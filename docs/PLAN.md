@@ -33,7 +33,8 @@ The shared CSS for the whole site is in the `<helmet><style>` of each `.dc.html`
 - **No cookie banner** until something needs consent.
 - **Map:** Google Maps embed on the Kontakt page, loaded only after a "Karte laden" click (two-click consent). Before that, no request goes to Google. The Datenschutz page needs a Google Maps paragraph; flag this to the client. See "Map".
 - **Forms:** UI only for now (validation, error summary, success state, stubbed submit).
-- **Motion:** all in phase 3. **Deployment:** out of scope for now.
+- **Motion:** all in phase 3.
+- **Deployment:** first a temporary staging server on DigitalOcean for the client's review, then the OVH VPS for launch (decided 2026-11-14). See "Hosting".
 - **Git:** read-only git only. No commits, branches or pushes until the user says so.
 - **Testing:** full rules: TDD, 80% coverage, Vitest (unit, component, Payload integration against a test DB) and Playwright + `@axe-core/playwright`.
 
@@ -178,9 +179,9 @@ Blocked:
 
 This is a guardrail against mistakes, not a security sandbox.
 
-## Phase 1: foundation, shell, home page → review ✅ built, awaiting review
+## Phase 1: foundation, shell, home page → review ✅ done
 
-**Status:** built on 2026-11-12; waiting at the review gate.
+**Status:** built on 2026-11-12; signed off on 2026-11-14.
 - **Versions:** Next 16.4.6, Payload 3.93.0, React 19.3.1. Content cache: `unstable_cache` with tags and no expiry; the hooks expire tags with `revalidateTag(tag, { expire: 0 })`.
 - **Unpublish detection:** Payload passes the latest *version* as `previousDoc`, which is a draft after any draft save. So a `beforeChange` hook reads the stored main document first (`src/cache/hooks.ts`). Collections and globals wire the hooks through `collectionCacheHooks` / `globalCacheHooks`, so the two halves can't drift apart.
 - **Hooks run before the DB commit**, but inside a route handler or server action Next only queues the tags and applies them after the handler returns. So no request can cache the old data in between.
@@ -250,9 +251,9 @@ This is a guardrail against mistakes, not a security sandbox.
     - Unit: `routes.ts` href builders and the generated rewrite/redirect tables.
 11. Review with the code-reviewer agent and fix CRITICAL/HIGH issues.
 
-## Phase 2: courses overview + course template ×6 → review ✅ built, awaiting review
+## Phase 2: courses overview + course template ×6 → review ✅ done
 
-**Status:** built on 2026-11-12; waiting at the review gate.
+**Status:** built on 2026-11-12; signed off on 2026-11-14.
 - **Routes:** `/kurse/` is static (re-rendered daily like every page). `/kurse/[slug]/` has `generateStaticParams` returning `[]`, so each course renders on its first visit and then stays cached until a publish. Unknown slugs get a 404.
 - **`teacher-training` global:**
   - Fields: `startMonth` (month picker), `price`, and `teaser` {`heading`, `text`, `facts` (up to 3 value/label rows), `priceNote`}.
@@ -295,9 +296,9 @@ This is a guardrail against mistakes, not a security sandbox.
 - Tests for each piece (E2E: every course renders, FAQ toggles, schedule hidden when empty).
 - **From the Phase 1 review:** `getCourse` caches `null` for any well-formed unknown slug under `course:<slug>`, with no expiry. Before the course route goes live, check the slug against `getCourses()` first, so random URLs can't grow the cache.
 
-## Phase 3: remaining pages, forms, motion → review ✅ built, awaiting review
+## Phase 3: remaining pages, forms, motion → review ✅ done
 
-**Status:** built on 2026-11-13; waiting at the review gate. Nothing is committed (git writes stay off).
+**Status:** built on 2026-11-13; signed off on 2026-11-14. The user committed it ("phase 3 complete").
 - **Pages:** Über uns, Yogaausbildungen, Mitgliedschaft & Preise, Anmeldeformular, Kontakt, Impressum, Datenschutz and the 404 page are all static, re-rendered daily and cleared on publish. `error.tsx` and `global-error.tsx` use the 404 layout with a reload link.
 - **New content types:**
   - `downloads` collection: PDF only. A tag says where a file is used (e.g. the contract on the pricing page), and each tag may be used once.
@@ -377,6 +378,43 @@ This is a guardrail against mistakes, not a security sandbox.
   - Everything off under `prefers-reduced-motion`.
 - Tests and code review.
 
+## Phase 4: staging on the DigitalOcean droplet → review ⏳ planned, not started
+
+The setup decisions are under "Hosting" → "Staging on DigitalOcean first". The user runs every step on the droplet and in GitHub: the command guard blocks `ssh`, `scp` and `docker push` here, and git stays read-only. `docs/DEPLOY.md` (step 10) is the runbook for those steps.
+
+1. **Production build:** `output: 'standalone'` in `next.config.ts`. A Dockerfile packages the build made in CI: Node 24, a non-root user, sharp. Add a health route (`/next/health`) that answers 200 once the database responds.
+2. **Migrations:** create the first Payload migration in `src/migrations/` and run it when the app starts (Payload's `prodMigrations`; confirm with docs-lookup). Dev keeps the schema push. From now on, every schema change ships with `pnpm payload migrate:create`.
+3. **Build in CI against a throwaway Postgres** that only the migrations have built (no push). `pnpm build` prerenders pages from the database, so this also proves the migrations are complete.
+4. **Startup refresh and warm-up** (decided in Phase 2):
+   - A secured route handler marks every cached page stale: a secret from env, constant-time compare, POST only, rate-limited.
+   - The container's start script calls it, then a warm-up requests every public page.
+   - The warm-up builds its own URL list from the routes and the published courses, because the sitemap stays empty under `noindex`.
+   - Both call `localhost` inside the container, so the shared login doesn't block them.
+5. **Staging compose file:**
+   - App plus Postgres. Postgres sits on an internal network only, and the app listens on `127.0.0.1:<free port>`.
+   - Memory limits on both containers, and Postgres tuned small (`shared_buffers`, `max_connections`).
+   - `uploads/` is bind-mounted.
+   - Restart policies, and log rotation so logs can't fill the 25 GB disk.
+6. **Proxy:** a site block for the sslip.io hostname, with the shared login (basic auth), HTTPS from Let's Encrypt and `X-Robots-Tag: noindex`. It goes into the proxy the droplet already uses for 80/443, or a Caddy we add if there is none.
+7. **Deploy script on the droplet** (`deploy.sh`):
+   - Pulls the new image, restarts the app and waits for the health route.
+   - Keeps the previous image for rollback and prunes older ones.
+   - The SSH key GitHub uses can run only this script (`restrict,command=` in `authorized_keys`).
+8. **GitHub Actions** (`.github/workflows/deploy.yml`), on push to `master`:
+   - Lint, typecheck, unit + integration tests, and E2E against a Postgres service.
+   - Then the build, the image pushed to GHCR, the deploy over SSH and a smoke test through the shared login.
+   - One deploy at a time. The image is pulled with the job's own token, so the droplet stores no long-lived GitHub token.
+9. **Data:**
+   - Export and import scripts: a `pg_dump` plus an `uploads/` archive. They do the first load (a fresh local seed → staging) and later the move (staging → OVH).
+   - After the first load the seed never runs on staging (its guard already refuses non-local databases).
+   - Nightly backups on the droplet, keeping 7, plus an off-site copy (where it goes is open).
+10. **Runbook** `docs/DEPLOY.md`: one-time droplet setup, GitHub secrets, first load, deploy, rollback, restore and the OVH move.
+11. **Tests and review:**
+    - Unit tests for the refresh route (secret, method, rate limit) and the warm-up URL list.
+    - A CI run on a branch before the first real deploy.
+    - Then code-reviewer and security-reviewer passes.
+    - Verify on the droplet: admin login, Live Preview and uploads behind the shared login; memory under load (`docker stats`).
+
 ## Verification
 - `docker compose up -d db`, then `pnpm seed`, then `pnpm dev`.
 - Open `/` and `/admin`. Log in; switch the admin language between de and en; save a draft and preview it (the public page doesn't change), then publish it (the public page shows it on the next load).
@@ -387,7 +425,21 @@ This is a guardrail against mistakes, not a security sandbox.
 - `node --test ".claude/hooks/**/*.test.mjs"` passes; a blocked command such as `git commit` is refused by the hook.
 
 ## Hosting (decided; a later phase)
-Stay on OVH. The client keeps her Web Hosting plan for the domain and email, and buys a VPS-1 (2 vCores, 4 GB, 40 GB NVMe) when we reach the hosting phase. That server runs Docker Compose (app + Postgres + Caddy), with images built in CI. Uploads are bind-mounted from the server's disk, and Postgres uses a volume on the same disk (see "Media & file storage"). Nightly backups (`pg_dump` plus `uploads/`) go to the client's existing OVH Web Hosting space, so no new service is needed. After each deploy, a warm-up script requests every sitemap URL to fill the cache. Because the page cache lives only in memory (`isrFlushToDisk: false`, Phase 2), every container start first calls a secured "revalidate everything" route handler (a secret from env, constant-time compare, POST only, rate-limited). Then the warm-up runs. Without that step, pages prerendered at build would serve build-time HTML after an unplanned restart. Not part of this plan's phases. Keep the code host-agnostic: env-based config and a Dockerfile added in the hosting phase.
+Stay on OVH. The client keeps her Web Hosting plan for the domain and email, and buys a VPS-1 (2 vCores, 4 GB, 40 GB NVMe) when we reach the hosting phase. That server runs Docker Compose (app + Postgres + Caddy), with images built in CI. Uploads are bind-mounted from the server's disk, and Postgres uses a volume on the same disk (see "Media & file storage"). Nightly backups (`pg_dump` plus `uploads/`) go to the client's existing OVH Web Hosting space, so no new service is needed. After each deploy, a warm-up script requests every public page to fill the cache. Because the page cache lives only in memory (`isrFlushToDisk: false`, Phase 2), every container start first calls a secured "revalidate everything" route handler (a secret from env, constant-time compare, POST only, rate-limited). Then the warm-up runs. Without that step, pages prerendered at build would serve build-time HTML after an unplanned restart. Phase 4 builds all of this for the staging droplet first; the OVH move is a later phase. Keep the code host-agnostic: env-based config, so the same image runs on both servers.
+
+### Staging on DigitalOcean first (decided 2026-11-14)
+Until the client buys the OVH VPS, the site runs on a DigitalOcean server. It's temporary: the client clicks through the site there and gives feedback while we finish the open items.
+- **Launch:** when everything is done, the site moves to the OVH VPS described above and goes live there. Then the DigitalOcean server is shut down.
+- **Same setup on both:** the same Docker image and compose file run on both servers; only env, secrets and DNS differ. So the move is a copy, and staging rehearses the OVH deploy.
+- **Hidden from search engines:** staging keeps `noindex` on, so robots.txt blocks everything and the sitemap stays empty.
+- **Server:** the user's existing droplet (1 vCPU, 1 GB RAM, 25 GB disk). It already runs another staging site and a small game server, each under its own Linux user. Our stack gets its own user too.
+  - Memory is the tight part: the containers get memory limits, Postgres is tuned small, and the droplet needs swap. Building on the droplet is out of the question; CI builds the image.
+- **Address:** an sslip.io hostname built from the droplet's IP (no domain), with HTTPS.
+- **Access:** the whole site sits behind one shared login (basic auth). The admin also keeps its own Payload login.
+- **Data:** the client's edits on staging are final and move to OVH. So staging is the source of truth: it needs backups, and the seed runs there only once, for the first load. The move is a final dump plus `uploads/`.
+- **Deploys:** GitHub Actions on every push to `master`.
+- **Email:** none on staging. The forms stay UI only until the client decides about the contact form. "Forgot password" doesn't work, so we set admin passwords directly.
+- **Who does what:** the user runs the droplet and GitHub steps; the code and the runbook come from Phase 4.
 
 From the Phase 1 review, before launch:
 - Add a Payload email adapter. Without one, "forgot password" has nowhere to send the link. The same adapter sends the Anmeldeformular and Kontakt submissions, which are UI only until then (decided 2026-11-12).
