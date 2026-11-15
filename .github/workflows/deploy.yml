@@ -50,6 +50,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
+          # v5 would turn on pnpm caching because of package.json "packageManager", but pnpm
+          # only exists after `corepack enable` below, so that fails ("Unable to locate pnpm").
+          package-manager-cache: false
 
       - name: Install dependencies
         run: |
@@ -142,6 +145,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
+          # See the verify job: no automatic cache, pnpm comes from Corepack below.
+          package-manager-cache: false
 
       - name: Install dependencies
         run: |
