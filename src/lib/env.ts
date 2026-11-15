@@ -17,6 +17,8 @@ const serverEnvSchema = z.object({
     .trim()
     .transform((value) => value.replace(/\/+$/, '')),
   PREVIEW_SECRET: z.string().trim().min(24, 'must be at least 24 characters'),
+  // Opens /next/refresh/ (the startup cache refresh). Optional: without it the route stays closed.
+  CACHE_REFRESH_SECRET: z.string().trim().min(24, 'must be at least 24 characters').optional(),
 })
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>
@@ -75,6 +77,26 @@ export function getMediaDir(source: EnvSource = process.env): string {
 /** PDF folder for the downloads collection (defaults to uploads/downloads), like MEDIA_DIR. */
 export function getDownloadsDir(source: EnvSource = process.env): string {
   return uploadDir(source, 'DOWNLOADS_DIR', DEFAULT_DOWNLOADS_DIR)
+}
+
+/**
+ * Whether Payload runs pending migrations when it starts. Only the production image sets
+ * PAYLOAD_MIGRATE_ON_START=true. Everything else keeps it off: dev and the test database use the
+ * schema push, and `payload migrate` stops to ask before touching a pushed database (in a
+ * container without a terminal, that ends the process). During `next build` it would also run
+ * once per build worker.
+ */
+export function shouldMigrateOnStart(source: EnvSource = process.env): boolean {
+  return source.PAYLOAD_MIGRATE_ON_START?.trim() === 'true'
+}
+
+/**
+ * Whether Payload may push the schema in dev (its default). PAYLOAD_DB_PUSH=false turns it off,
+ * for scripts that seed a database built by migrations (scripts/first-load-export.mjs): a push
+ * would leave a "dev" row there, and a server's start-up migration would then stop to ask.
+ */
+export function shouldPushSchema(source: EnvSource = process.env): boolean {
+  return source.PAYLOAD_DB_PUSH?.trim() !== 'false'
 }
 
 let cached: ServerEnv | undefined

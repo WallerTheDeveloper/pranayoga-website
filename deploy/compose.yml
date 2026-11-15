@@ -1,0 +1,89 @@
+# Server stack: the app image (built by CI) plus its own PostgreSQL.
+# Lives in /home/pranayoga/app/ on the server, next to .env (from deploy/env.example),
+# deploy.sh, backup.sh, restore.sh and the uploads/ and backups/ folders. See docs/DEPLOY.md.
+#
+# Same file on the DigitalOcean staging droplet and the OVH VPS; only .env differs. The proxy in
+# front (nginx on the droplet, Caddy on OVH later) is not part of this file.
+name: pranayoga
+
+# Rotated, so logs can't fill the disk.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '3'
+
+services:
+  app:
+    # A local tag that deploy.sh points at the image it pulled (rollback keeps :previous).
+    image: pranayoga-app:current
+    pull_policy: never
+    init: true
+    restart: unless-stopped
+    environment:
+      DATABASE_URI: postgres://pranayoga:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/pranayoga
+      NEXT_PUBLIC_SERVER_URL: ${SERVER_URL:?set SERVER_URL in .env}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:?set PAYLOAD_SECRET in .env}
+      PREVIEW_SECRET: ${PREVIEW_SECRET:?set PREVIEW_SECRET in .env}
+      CACHE_REFRESH_SECRET: ${CACHE_REFRESH_SECRET:?set CACHE_REFRESH_SECRET in .env}
+      # Keeps the heap small on a shared 1 GB server; images are processed outside the heap.
+      NODE_OPTIONS: --max-old-space-size=320
+    ports:
+      # Loopback only: the proxy on this machine reaches the app, the internet doesn't. The
+      # container opens this port only after its start-up cache refresh (docker/start.mjs).
+      - '127.0.0.1:${APP_PORT:-3100}:3000'
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [web, backend]
+    # The app runs as `node`; no setuid program in the image can give it more rights.
+    security_opt: ['no-new-privileges:true']
+    mem_limit: 512m
+    stop_grace_period: 20s
+    logging: *logging
+
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pranayoga
+      POSTGRES_DB: pranayoga
+      # Only read when the volume is first created; changing it later doesn't change the password.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    # Sized for a small site on a small server.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=32MB
+      - -c
+      - effective_cache_size=96MB
+      - -c
+      - work_mem=2MB
+      - -c
+      - maintenance_work_mem=32MB
+      - -c
+      - max_connections=20
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U pranayoga -d pranayoga']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # No published port: only the app reaches the database.
+    networks: [backend]
+    mem_limit: 192m
+    shm_size: 64m
+    stop_grace_period: 30s
+    logging: *logging
+
+networks:
+  web: {}
+  # No route outside: the database can't reach the internet, nor the internet it.
+  backend:
+    internal: true
+
+volumes:
+  pgdata:

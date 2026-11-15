@@ -1,16 +1,15 @@
-.git
-.github
-.claude
-.next
-.vscode
-node_modules
-coverage
-test-results
-playwright-report
-blob-report
-docs
-uploads
-.env
-.env.*
-!.env.example
-*.log
+# The image only packages the CI build (see Dockerfile): send nothing else to the builder.
+*
+!.next/standalone
+!.next/static
+!public
+!docker/start.mjs
+!docker/warm-up.mjs
+!docker/forward.mjs
+!docker/healthcheck.mjs
+
+# Never ship env files or uploads, even if a build left them in the standalone folder.
+.next/standalone/.env
+.next/standalone/.env.*
+.next/standalone/uploads
+.next/standalone/.next/cache

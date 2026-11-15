@@ -25,7 +25,8 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --project int",
     "test:watch": "cross-env NODE_OPTIONS=--no-deprecation vitest",
     "e2e": "cross-env NODE_OPTIONS=--no-deprecation playwright test",
-    "hooks:test": "node --test \".claude/hooks/**/*.test.mjs\""
+    "hooks:test": "node --test \".claude/hooks/**/*.test.mjs\"",
+    "first-load:export": "node scripts/first-load-export.mjs"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.93.0",

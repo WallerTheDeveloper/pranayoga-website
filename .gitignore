@@ -21,6 +21,9 @@ next-env.d.ts
 # uploads live on the server's disk, never in git (docs/PLAN.md "Media & file storage")
 /uploads/
 
+# first-load exports (scripts/first-load-export.mjs): database dumps, never in git
+/exports/
+
 # testing
 /coverage
 /test-results/

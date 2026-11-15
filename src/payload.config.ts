@@ -20,8 +20,9 @@ import { BusinessSettings } from './globals/BusinessSettings'
 import { LegalNotice, PrivacyPolicy } from './globals/legal'
 import { TeacherTraining } from './globals/TeacherTraining'
 import { TechnicalSettings } from './globals/TechnicalSettings'
-import { getServerEnv } from './lib/env'
+import { getServerEnv, shouldMigrateOnStart, shouldPushSchema } from './lib/env'
 import { previewPathFor, previewUrl } from './lib/preview'
+import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -78,6 +79,10 @@ export default buildConfig({
   },
   db: postgresAdapter({
     pool: { connectionString: env.DATABASE_URI },
+    // Dev and tests push the schema. Servers run the migrations in src/migrations when the app
+    // starts; every schema change ships with `pnpm payload migrate:create` (docs/DEPLOY.md).
+    prodMigrations: shouldMigrateOnStart() ? migrations : undefined,
+    push: shouldPushSchema(),
   }),
   sharp,
   plugins: [redirectsPlugin(redirectsPluginConfig)],
