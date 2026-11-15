@@ -46,7 +46,8 @@ export const Downloads: CollectionConfig = {
   hooks: collectionCacheHooks({ drafts: false, tags: downloadTags }),
   upload: {
     // Server disk next to the images (docs/PLAN.md "Media & file storage").
-    staticDir: path.resolve(process.cwd(), getDownloadsDir()),
+    // Relative to the working directory, like Media (no explicit process.cwd(), see there).
+    staticDir: path.resolve(getDownloadsDir()),
     mimeTypes: ['application/pdf'],
   },
   fields: [

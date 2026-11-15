@@ -63,7 +63,9 @@ export const Media: CollectionConfig = {
   },
   upload: {
     // Server disk, outside git and the Docker build context (docs/PLAN.md "Media & file storage").
-    staticDir: path.resolve(process.cwd(), getMediaDir()),
+    // Relative to the working directory (project root; /app in the image). No explicit
+    // process.cwd(): the build tracer would then copy the whole project into the image.
+    staticDir: path.resolve(getMediaDir()),
     mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
     focalPoint: true,
     crop: true,

@@ -378,7 +378,114 @@ This is a guardrail against mistakes, not a security sandbox.
   - Everything off under `prefers-reduced-motion`.
 - Tests and code review.
 
-## Phase 4: staging on the DigitalOcean droplet → review ⏳ planned, not started
+## Phase 4: staging on the DigitalOcean droplet → review
+
+**Status:** built on 2026-11-14; waiting at the review gate. Nothing runs on the droplet yet: the user follows `docs/DEPLOY.md` (steps 1–8). Git is untouched.
+- **What's built:**
+  - Standalone build plus a `Dockerfile` that only packages it.
+  - The startup scripts in `docker/`: start, refresh and warm-up, the forwarder, the health check.
+  - `/next/health/` and `/next/refresh/`, and the first migration in `src/migrations/`.
+  - On the server: `deploy/compose.yml`, `deploy.sh`, `backup.sh`, `restore.sh` and the nginx block.
+  - `scripts/first-load-export.mjs` and the CI workflow `.github/workflows/deploy.yml`.
+  - The runbook `docs/DEPLOY.md`.
+- **Decisions made while building:**
+  - **One process at start-up.** `docker/start.mjs` loads Next's `server.js` in-process; a separate child process cost about 55 MB.
+  - **The public port opens only after the refresh.**
+    - Next listens on `127.0.0.1:3001` inside the container. A plain TCP forwarder opens the published port 3000 once `/next/refresh/` has succeeded, and the warm-up then runs.
+    - So no visitor ever sees the pages CI prerendered from its empty database. Nobody outside the container can reach the refresh route before the start-up refresh.
+    - While the port is closed, nginx answers 503 with "Die Vorschau wird gerade aktualisiert".
+  - **Healthy means:** refresh and warm-up done, and `/next/health/` answers 200 (it runs a database query).
+    - `deploy.sh` waits up to 420 s, but gives up at once if the app exits or restarts. Then it rolls back to the `:previous` image.
+    - It keeps two local tags, `pranayoga-app:current` and `:previous`; each image's revision comes from its OCI label.
+  - **Migrations.**
+    - The first migration is `20261114_135648_initial`. The image runs pending migrations on start (`PAYLOAD_MIGRATE_ON_START=true`, set only in the Dockerfile). Dev and tests keep pushing the schema.
+    - `PAYLOAD_DB_PUSH=false` turns the push off for the first-load export.
+    - CI fails when the schema changed without a migration (`migrate:create --skip-empty` plus `git status`).
+  - **Standalone tracing.**
+    - `staticDir` uses `path.resolve(getMediaDir())` without an explicit `process.cwd()`. With it, Turbopack copied the whole project into the standalone folder (196 MB, `.env` included); now it's 50 MB.
+    - sharp's libvips needs `outputFileTracingIncludes`, or every upload fails on Linux.
+  - **CI:**
+    - It builds against a Postgres that only the migrations have built, so the build also proves the migrations are complete.
+    - It smoke-tests the image on an empty database and pushes only on `master`.
+    - The deploy job hands its own token to the droplet on stdin. Checkouts don't keep the token in `.git/config`.
+    - Shell scripts pass shellcheck.
+  - **Uploads:**
+    - The container's `node` user owns `uploads/`. Every start, and every backup, re-applies the ownership and makes the files readable, so `pranayoga` can archive them from the host.
+    - Other users can't reach them, because `~/app` is 700.
+  - **One lock** for deploy, rollback, restore and backup. A deploy waits up to 10 minutes for a running restore; the nightly backup waits up to an hour. `restore.sh` asks for confirmation before it takes the lock.
+  - **`restore.sh` safety:**
+    - It backs up the current state first and restores into a separate database.
+    - It refuses dumps without migration records, and dumps from a schema-push database (batch −1 row).
+    - Only then does it swap the databases.
+  - **First load:**
+    - `pnpm first-load:export` builds a fresh database from the migrations, seeds it, and writes the folder `restore.sh` reads.
+    - A dev dump won't do, because dev pushes the schema.
+  - **nginx block:**
+    - Shared login over the whole site, and `X-Robots-Tag: noindex, nofollow` on every answer.
+    - `/next/refresh` answers 404 from outside.
+    - 16 MB uploads.
+    - The login header is stripped before the app.
+  - **Firewall (runbook step 6):**
+    - Only nginx (`www-data`) and root may connect to port 3100.
+    - `pranayoga` may not query DigitalOcean's metadata service.
+    - Tested with UFW in an Ubuntu 24.04 container.
+  - **Memory:** measured locally after warm-up: app about 163 MiB, database about 61 MiB. Limits are 512 MB and 192 MB; the Node heap is capped at 320 MB.
+- **Verified locally:**
+  - The Linux build (CI simulation in `node:24.22.3-trixie-slim`): drift check, migrate, build, libvips included.
+  - The image with `deploy/compose.yml`:
+    - First start on an empty database: migration, refresh, warm-up.
+    - The public port refused until the refresh, then 200, then healthy.
+    - Six courses after a restore.
+  - Scripts:
+    - `restore.sh` end to end, and its refusals (no answer, no migrations, dev row).
+    - `backup.sh`.
+    - `wait_healthy` failing within a second on a crashing start.
+    - `deploy.sh` input validation, `status`, rollback.
+  - The lock, in Ubuntu: wait, give up, nested run.
+  - The nginx block in nginx 1.28: 401 without the login, 503 with the note, 404 on `/next/refresh/`, noindex everywhere.
+  - Commands checked:
+    - the generated basic-auth password;
+    - the secret fill-in without exposing secrets in process lists;
+    - the smoke test's escaping of the login;
+    - the PowerShell password prompt.
+- **Not verified yet (needs the droplet or GitHub):**
+  - rootless Docker itself: the AppArmor profile, memory delegation, ownership of `uploads/` through subuids;
+  - certbot;
+  - the real GitHub Actions run;
+  - the forced-command SSH key;
+  - UFW on the droplet;
+  - Live Preview and uploads behind the shared login;
+  - memory under load.
+- **Review:** a code-reviewer and a security-reviewer pass found 0 CRITICAL issues.
+  - Fixed:
+    - Build-time pages were served until the refresh. The public port now opens after it.
+    - A crash-looping start waited the full 420 s.
+    - `restore.sh` held the lock while it waited for confirmation.
+    - Backups weren't serialized with restores.
+    - `uploads/` could become unreadable for backups.
+    - A refresh route that threw on a bad env answered with a bare 500 instead of the route's own JSON error.
+    - Failed images weren't pruned after a rollback.
+    - Generated secrets appeared in process lists.
+    - The seed password landed in PowerShell history.
+    - The checkout token was readable by dependency scripts.
+    - The smoke test broke on quotes or backslashes in the shared password.
+    - Added the firewall rules, `no-new-privileges` on the app, and the shellcheck step in CI.
+    - Smaller fixes: a wrong concurrency comment, the CRLF check, and the unused `# syntax=` line.
+  - Left as is:
+    - An image is pushed to GHCR before E2E finishes. Deploys still wait for every check.
+    - Actions are pinned to tags, not SHAs. They are first-party only.
+    - `/next/health/` has no rate limit; it's behind the shared login here, and Caddy limits it on OVH.
+    - Older SHAs aren't refused on redeploy; that only happens when a run is re-run by hand.
+- **Tests:**
+  - 490 unit and integration tests pass (coverage 97.6% statements, 91.6% branches). New tests cover the refresh handler, rate limiter, health handler, warm-up list, startup sequence, forwarder and env flags.
+  - 163 E2E tests passed before the review fixes; none of those fixes touch the pages.
+  - Lint, typecheck, Prettier and shellcheck are clean.
+- **Answered by the user (2026-11-14):**
+  - The domain `pranayogastudio.de` is right.
+  - UFW allows SSH port 2222 from anywhere, so GitHub's runners connect directly; no tailnet.
+  - The user protects `master` in GitHub (`docs/DEPLOY.md`, step 5).
+
+**All decisions made (2026-11-14):** rootless Docker for `pranayoga`, behind the droplet's nginx, at `pranayoga.pickmajob.cc` (changed 2026-11-15 from `vorschau.pranayogastudio.de`). See "Staging on DigitalOcean first".
 
 The setup decisions are under "Hosting" → "Staging on DigitalOcean first". The user runs every step on the droplet and in GitHub: the command guard blocks `ssh`, `scp` and `docker push` here, and git stays read-only. `docs/DEPLOY.md` (step 10) is the runbook for those steps.
 
@@ -392,10 +499,17 @@ The setup decisions are under "Hosting" → "Staging on DigitalOcean first". The
    - Both call `localhost` inside the container, so the shared login doesn't block them.
 5. **Staging compose file:**
    - App plus Postgres. Postgres sits on an internal network only, and the app listens on `127.0.0.1:<free port>`.
+   - No Caddy here, because the droplet's nginx is the proxy. The OVH phase adds Caddy in a second compose file.
    - Memory limits on both containers, and Postgres tuned small (`shared_buffers`, `max_connections`).
    - `uploads/` is bind-mounted.
    - Restart policies, and log rotation so logs can't fill the 25 GB disk.
-6. **Proxy:** a site block for the sslip.io hostname, with the shared login (basic auth), HTTPS from Let's Encrypt and `X-Robots-Tag: noindex`. It goes into the proxy the droplet already uses for 80/443, or a Caddy we add if there is none.
+6. **Proxy:** a server block in the droplet's nginx with:
+   - the shared login (basic auth);
+   - `X-Robots-Tag: noindex`;
+   - `client_max_body_size 16m`;
+   - HTTPS through certbot for `pranayoga.pickmajob.cc`.
+
+   Run `nginx -t` before every reload, because the other sites share this nginx.
 7. **Deploy script on the droplet** (`deploy.sh`):
    - Pulls the new image, restarts the app and waits for the health route.
    - Keeps the previous image for rollback and prunes older ones.
@@ -407,8 +521,12 @@ The setup decisions are under "Hosting" → "Staging on DigitalOcean first". The
 9. **Data:**
    - Export and import scripts: a `pg_dump` plus an `uploads/` archive. They do the first load (a fresh local seed → staging) and later the move (staging → OVH).
    - After the first load the seed never runs on staging (its guard already refuses non-local databases).
-   - Nightly backups on the droplet, keeping 7, plus an off-site copy (where it goes is open).
-10. **Runbook** `docs/DEPLOY.md`: one-time droplet setup, GitHub secrets, first load, deploy, rollback, restore and the OVH move.
+   - Nightly backups on the droplet, keeping 7. The runbook has the command to download the latest one to the user's PC.
+10. **Runbook** `docs/DEPLOY.md`:
+    - one-time droplet setup: a snapshot first, rootless Docker for `pranayoga`, the nginx block;
+    - GitHub secrets, first load and deploy;
+    - rollback, backup download and restore;
+    - the OVH move.
 11. **Tests and review:**
     - Unit tests for the refresh route (secret, method, rate limit) and the warm-up URL list.
     - A CI run on a branch before the first real deploy.
@@ -432,11 +550,38 @@ Until the client buys the OVH VPS, the site runs on a DigitalOcean server. It's 
 - **Launch:** when everything is done, the site moves to the OVH VPS described above and goes live there. Then the DigitalOcean server is shut down.
 - **Same setup on both:** the same Docker image and compose file run on both servers; only env, secrets and DNS differ. So the move is a copy, and staging rehearses the OVH deploy.
 - **Hidden from search engines:** staging keeps `noindex` on, so robots.txt blocks everything and the sitemap stays empty.
-- **Server:** the user's existing droplet (1 vCPU, 1 GB RAM, 25 GB disk). It already runs another staging site and a small game server, each under its own Linux user. Our stack gets its own user too.
-  - Memory is the tight part: the containers get memory limits, Postgres is tuned small, and the droplet needs swap. Building on the droplet is out of the question; CI builds the image.
-- **Address:** an sslip.io hostname built from the droplet's IP (no domain), with HTTPS.
+- **Server:** the user's existing droplet (1 vCPU, 1 GB RAM, 25 GB disk, Ubuntu 24.04, x86_64). It already runs other sites and a small game server. Our site gets its own Linux user, `pranayoga`, and no other user can read or change its files (decided 2026-11-14).
+- **What's already on the droplet** (surveyed 2026-11-14):
+  - nginx owns 80/443 with three sites enabled; ours becomes a fourth server block.
+    - Its catch-all on port 80 (`server_name _`) sends plain-IP requests to another site, so ours answers only by name.
+    - No site sets `client_max_body_size` (nginx's default is 1 MB). Ours sets 16 MB for the 15 MB upload limit.
+  - certbot 2.9 (nginx plugin) manages the other sites' Let's Encrypt certificates.
+  - Our app listens on `127.0.0.1` only. Ports 3000, 3001, 8000 and 9001 are taken.
+  - PostgreSQL 16.15 runs on the host (`127.0.0.1:5432`), while dev and tests use 18. Docker isn't installed.
+  - SSH listens on port 2222. UFW is on, and Tailscale is installed.
+  - Memory: 301 MB available; 890 MB of the 2 GB swap is already in use. Disk: 14 GB free.
+- **Runtime: Docker, the same setup as on OVH (decided 2026-11-14).**
+  - `pranayoga` runs its own rootless Docker, so its containers and files stay apart from the other users. The system-wide Docker service stays off.
+  - The stack is the app plus its own Postgres 18 container, as in dev and on OVH. The host's Postgres 16 isn't used.
+  - Memory is tight: about 400–580 MB extra, with 301 MB available. The user accepts this because the droplet's other services sit idle: a dev-only staging site, an unused game server and an unused pick-ma-job. The kernel can swap them out.
+  - Both containers get memory limits, and Postgres is tuned small. Building on the droplet is out of the question; CI builds the image.
+  - If the site turns out too slow, the fallback is resizing to 2 GB, which the user prefers to avoid.
+- **Address: `pranayoga.pickmajob.cc` (changed 2026-11-15; first decided as `vorschau.pranayogastudio.de` on 2026-11-14).**
+  - Why the change: `pranayogastudio.de` uses Cloudflare's nameservers (`roan` and `tricia.ns.cloudflare.com`). Only the client or a former developer can reach that Cloudflare account, and getting a record added there would take too long. So certbot for `vorschau` failed with NXDOMAIN. Records in the OVH DNS zone have no effect while those nameservers are set.
+  - It's an A record `pranayoga` in the user's own Cloudflare zone `pickmajob.cc`, set to "DNS only" and pointing to the droplet. The live WordPress site and the client's email stay untouched.
+  - HTTPS comes through certbot, as for the droplet's other sites.
+  - Staging keeps this name until launch; no switch to `vorschau` is planned. The image reads the address at runtime, so a switch would need only a new nginx block, a certificate, `SERVER_URL` in `.env` and a restart (`docs/DEPLOY.md`, "Changing the address").
+  - The record and the nginx block are removed at launch.
+  - **Launch needs DNS control back.** The registrar is the client's OVH account, where the user has full access, and the nameservers are set there. Before changing them, copy every existing record into the new zone (the website, and MX, SPF and DKIM for email), and check whether DNSSEC is on.
+  - Considered and dropped:
+    - sslip.io: it isn't on the Public Suffix List (checked 2026-11-14). Let's Encrypt counts every sslip.io name as one domain, with one shared limit of 50 new certificates a week, so our certificate could be refused.
+    - The bare IP over plain HTTP: passwords would travel unencrypted, browsers would mark the login pages "Not secure", and copy-to-clipboard wouldn't work.
 - **Access:** the whole site sits behind one shared login (basic auth). The admin also keeps its own Payload login.
-- **Data:** the client's edits on staging are final and move to OVH. So staging is the source of truth: it needs backups, and the seed runs there only once, for the first load. The move is a final dump plus `uploads/`.
+- **Data:** the client's edits on staging are final and move to OVH. So staging is the source of truth: the seed runs there only once, for the first load. The move is a final dump plus `uploads/`.
+- **Backups:** no paid DigitalOcean backups (decided 2026-11-14).
+  - A nightly job on the droplet keeps 7 days of database dumps plus `uploads/`.
+  - The user downloads the latest copy to their PC after each round of client edits and before the OVH move.
+  - Before the one-time setup, the user takes a droplet snapshot and deletes it once the setup works. Snapshots are billed per GB while kept.
 - **Deploys:** GitHub Actions on every push to `master`.
 - **Email:** none on staging. The forms stay UI only until the client decides about the contact form. "Forgot password" doesn't work, so we set admin passwords directly.
 - **Who does what:** the user runs the droplet and GitHub steps; the code and the runbook come from Phase 4.

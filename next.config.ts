@@ -8,6 +8,14 @@ import { buildRedirects, buildRewrites } from './src/lib/routes'
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const nextConfig: NextConfig = {
+  // The Docker image runs .next/standalone/server.js (Dockerfile). `next start` still works,
+  // with a warning; E2E uses it.
+  output: 'standalone',
+  // The tracer copies sharp's .node binding but not the libvips libraries it loads (a separate
+  // @img/sharp-libvips-* package on Linux); without them every image upload fails.
+  outputFileTracingIncludes: {
+    '/*': ['node_modules/.pnpm/@img+sharp-*/node_modules/@img/*/lib/**/*'],
+  },
   // Matches the WordPress URLs (/kurse/hatha-yoga/).
   trailingSlash: true,
   poweredByHeader: false,

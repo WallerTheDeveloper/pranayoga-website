@@ -1,0 +1,275 @@
+# CI on every push; on master it also builds the image, pushes it to GHCR and deploys it to the
+# staging droplet. Setup (secrets, server, SSH key) in docs/DEPLOY.md.
+#
+# Only GitHub's own actions are used: pnpm comes from Corepack (package.json "packageManager")
+# and the registry login is the plain docker CLI.
+name: CI and staging deploy
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # On branches a newer push cancels the running check. On master a running pipeline always
+  # finishes; of the runs waiting behind it only the newest is kept, so the latest commit deploys.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+env:
+  NODE_VERSION: 24.22.3
+  NEXT_TELEMETRY_DISABLED: '1'
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+
+jobs:
+  verify:
+    name: Lint, types, tests, E2E
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    services:
+      # The integration and E2E database (same as docker compose "db-test").
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: pranayoga
+          POSTGRES_PASSWORD: pranayoga
+          POSTGRES_DB: pranayoga_test
+        ports: ['5434:5432']
+        options: >-
+          --health-cmd "pg_isready -U pranayoga -d pranayoga_test"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Keeps the job token out of .git/config, where dependency scripts could read it.
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Write .env.test (throwaway secrets)
+        run: |
+          {
+            echo "DATABASE_URI=postgres://pranayoga:pranayoga@127.0.0.1:5434/pranayoga_test"
+            echo "PAYLOAD_SECRET=$(openssl rand -hex 32)"
+            echo "NEXT_PUBLIC_SERVER_URL=http://localhost:3100"
+            echo "PREVIEW_SECRET=$(openssl rand -hex 24)"
+            echo "MEDIA_DIR=uploads/test-media"
+            echo "DOWNLOADS_DIR=uploads/test-downloads"
+          } > .env.test
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: |
+          # next-env.d.ts (CSS module and image types) isn't in git; typegen writes it.
+          pnpm exec next typegen
+          pnpm typecheck
+
+      - name: Formatting
+        run: pnpm format:check
+
+      - name: Shell scripts
+        working-directory: deploy
+        run: shellcheck -x deploy.sh backup.sh restore.sh
+
+      - name: Unit and integration tests (coverage ≥ 80%)
+        run: pnpm test --coverage
+
+      - name: E2E (seeds, builds and starts the site on :3100)
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm e2e
+
+      - name: Keep the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  image:
+    name: Build and check the image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    services:
+      # Built only by the migrations: `pnpm build` prerenders against it.
+      build-db:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: pranayoga
+          POSTGRES_PASSWORD: pranayoga
+          POSTGRES_DB: pranayoga
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U pranayoga -d pranayoga"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+      # Empty: the image's own start-up migration builds it during the smoke test.
+      smoke-db:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: pranayoga
+          POSTGRES_PASSWORD: pranayoga
+          POSTGRES_DB: pranayoga
+        ports: ['5433:5432']
+        options: >-
+          --health-cmd "pg_isready -U pranayoga -d pranayoga"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      DATABASE_URI: postgres://pranayoga:pranayoga@127.0.0.1:5432/pranayoga
+      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # This job's token may push packages: keep it out of .git/config, where the
+          # dependencies' scripts (install, build) could read it.
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Throwaway secrets and image name
+        run: |
+          for name in PAYLOAD_SECRET PREVIEW_SECRET CACHE_REFRESH_SECRET; do
+            value="$(openssl rand -hex 32)"
+            echo "::add-mask::$value"
+            echo "$name=$value" >> "$GITHUB_ENV"
+          done
+          echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Every schema change has a migration
+        run: |
+          pnpm payload migrate:create --skip-empty drift-check
+          if [ -n "$(git status --porcelain -- src/migrations)" ]; then
+            echo "::error::The Payload schema changed without a migration. Run: pnpm payload migrate:create <name>"
+            git status --porcelain -- src/migrations
+            exit 1
+          fi
+
+      - name: Build the schema from the migrations only
+        run: pnpm payload migrate
+
+      - name: Build (prerenders against the migrated database)
+        run: pnpm build
+
+      - name: Build the image
+        run: |
+          docker build \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            -t "$IMAGE:$GITHUB_SHA" .
+
+      - name: Smoke-test the image on an empty database
+        run: |
+          docker run -d --name smoke --network host \
+            -e PORT=3999 -e INTERNAL_PORT=3998 \
+            -e DATABASE_URI=postgres://pranayoga:pranayoga@127.0.0.1:5433/pranayoga \
+            -e NEXT_PUBLIC_SERVER_URL=http://localhost:3999 \
+            -e PAYLOAD_SECRET -e PREVIEW_SECRET -e CACHE_REFRESH_SECRET \
+            "$IMAGE:$GITHUB_SHA"
+          status=starting
+          for _ in $(seq 1 100); do
+            status="$(docker inspect -f '{{ .State.Health.Status }}' smoke)"
+            [ "$status" = healthy ] && break
+            [ "$(docker inspect -f '{{ .State.Running }}' smoke)" = true ] || break
+            sleep 3
+          done
+          docker logs smoke
+          [ "$status" = healthy ] || { echo "::error::The image did not get healthy ($status)"; exit 1; }
+          for path in / /kurse/ /kontakt/ /robots.txt /admin/login/ /next/health/; do
+            curl -fsS -o /dev/null -w "%{http_code} $path\n" "http://127.0.0.1:3999$path"
+          done
+          code="$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:3999/next/refresh/)"
+          [ "$code" = 401 ] || { echo "::error::/next/refresh/ without the secret answered $code"; exit 1; }
+          docker rm -f smoke
+
+      - name: Push the image
+        if: github.ref == 'refs/heads/master'
+        env:
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker push "$IMAGE:$GITHUB_SHA"
+          docker logout ghcr.io
+
+  deploy:
+    name: Deploy to staging
+    needs: [verify, image]
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: staging
+      url: ${{ vars.STAGING_URL }}
+    permissions:
+      contents: read
+      # The droplet pulls with this job's token, so it stores no GitHub token of its own.
+      packages: read
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    steps:
+      - name: SSH key and pinned host key
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Deploy (deploy.sh on the droplet)
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # The key may only run deploy.sh; the token travels on stdin, never in arguments.
+          printf '%s\n' "$REGISTRY_TOKEN" | ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o ServerAliveInterval=30 \
+            "$DEPLOY_USER@$DEPLOY_HOST" deploy "$GITHUB_SHA" "$GITHUB_ACTOR"
+
+      - name: Smoke test through the shared login
+        env:
+          STAGING_URL: ${{ vars.STAGING_URL }}
+          STAGING_BASIC_AUTH: ${{ secrets.STAGING_BASIC_AUTH }}
+        run: |
+          # Credentials go through a config on stdin, not the command line. Backslashes and
+          # quotes are escaped for curl's quoted config strings.
+          login="$(printf '%s' "$STAGING_BASIC_AUTH" | sed 's/[\\"]/\\&/g')"
+          auth() { printf 'user = "%s"\n' "$login"; }
+          for path in / /kurse/ /kontakt/ /admin/login/; do
+            auth | curl -fsS -K - -o /dev/null -w "%{http_code} $path\n" "$STAGING_URL$path"
+          done
+          headers="$(auth | curl -fsS -K - -D - -o /dev/null "$STAGING_URL/")"
+          grep -qi '^x-robots-tag: noindex' <<<"$headers" ||
+            { echo "::error::X-Robots-Tag: noindex is missing"; exit 1; }
+          code="$(curl -s -o /dev/null -w '%{http_code}' "$STAGING_URL/")"
+          [ "$code" = 401 ] || { echo "::error::Without the shared login the site answered $code"; exit 1; }
+
+      - name: Remove the SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

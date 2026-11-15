@@ -1,0 +1,6 @@
+# Files that run on Linux servers or in the image keep LF line endings in every checkout,
+# including Windows: bash fails on a script with CRLF ("$'\r': command not found").
+*.sh text eol=lf
+deploy/** text eol=lf
+docker/** text eol=lf
+Dockerfile text eol=lf
