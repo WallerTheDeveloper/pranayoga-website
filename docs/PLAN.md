@@ -378,9 +378,14 @@ This is a guardrail against mistakes, not a security sandbox.
   - Everything off under `prefers-reduced-motion`.
 - Tests and code review.
 
-## Phase 4: staging on the DigitalOcean droplet → review
+## Phase 4: staging on the DigitalOcean droplet → review ✅ done
 
-**Status:** built on 2026-11-14; waiting at the review gate. Nothing runs on the droplet yet: the user follows `docs/DEPLOY.md` (steps 1–8). Git is untouched.
+**Status:** built on 2026-11-14; deployed and signed off on 2026-11-15. The user ran `docs/DEPLOY.md` (steps 1–8) and merged to `master`, which deployed.
+- **Live:** `https://pranayoga.pickmajob.cc`, behind the shared login, with the first load restored and the client's admin account created. Memory after warm-up: app 207 MB, database 35 MB.
+- **Changed during the rollout:**
+  - The address moved to `pranayoga.pickmajob.cc`, because the client's DNS can't be reached (see "Address" under "Staging on DigitalOcean first").
+  - CI: `package-manager-cache: false` on `actions/setup-node@v5`. Its automatic pnpm cache ran before Corepack had installed pnpm, and both jobs failed.
+- **Not checked yet on the droplet:** uploads, Live Preview, and the first nightly backup (`ls ~/app/backups`).
 - **What's built:**
   - Standalone build plus a `Dockerfile` that only packages it.
   - The startup scripts in `docker/`: start, refresh and warm-up, the forwarder, the health check.
